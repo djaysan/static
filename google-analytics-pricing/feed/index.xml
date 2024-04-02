@@ -8,9 +8,9 @@
 <channel>
 	<title>
 	Comments on: Google Analytics Pricing	</title>
-	<atom:link href="/google-analytics-pricing/feed/" rel="self" type="application/rss+xml" />
-	<link>/google-analytics-pricing/</link>
-	<description>Privacy Friendly Analytics!</description>
+	<atom:link href="https://djaysan.github.io/static/google-analytics-pricing/feed/" rel="self" type="application/rss+xml" />
+	<link>https://djaysan.github.io/static/google-analytics-pricing/</link>
+	<description></description>
 	<lastBuildDate>Mon, 04 Dec 2023 23:45:45 +0000</lastBuildDate>
 	<sy:updatePeriod>
 	hourly	</sy:updatePeriod>

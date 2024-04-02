@@ -1,4 +1,4 @@
-/*! elementor-pro - v3.20.0 - 26-03-2024 */
+/*! elementor-pro - v3.18.0 - 06-12-2023 */
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
@@ -1628,7 +1628,6 @@ Object.defineProperty(exports, "__esModule", ({
 exports["default"] = void 0;
 var _extends2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/extends */ "../node_modules/@babel/runtime/helpers/extends.js"));
 var _react = _interopRequireWildcard(__webpack_require__(/*! react */ "react"));
-var React = _react;
 var _appUi = __webpack_require__(/*! @elementor/app-ui */ "@elementor/app-ui");
 var _utils = __webpack_require__(/*! ../utils.js */ "../core/app/assets/js/utils.js");
 function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
@@ -1642,7 +1641,7 @@ const ConnectButton = props => {
     }
     jQuery(buttonRef.current).elementorConnect();
   }, []);
-  return /*#__PURE__*/React.createElement(_appUi.Button, (0, _extends2.default)({}, props, {
+  return /*#__PURE__*/_react.default.createElement(_appUi.Button, (0, _extends2.default)({}, props, {
     elRef: buttonRef,
     className: className
   }));
@@ -1662,7 +1661,7 @@ ConnectButton.defaultProps = {
   rel: 'noopener noreferrer',
   text: __('Connect & Activate', 'elementor')
 };
-var _default = exports["default"] = React.memo(ConnectButton);
+var _default = exports["default"] = _react.default.memo(ConnectButton);
 
 /***/ }),
 
@@ -3700,9 +3699,9 @@ function Import() {
       resetActionState
     } = _react.default.useContext(_templates.Context),
     [importedTemplate, setImportedTemplate] = _react.default.useState(null),
-    isImport = action.current === _templates.TemplatesProvider.actions.IMPORT,
-    isUploading = isImport && action.loading,
-    hasError = isImport && action.error;
+    isImport = _react.default.useMemo(() => action.current === _templates.TemplatesProvider.actions.IMPORT, [action]),
+    isUploading = _react.default.useMemo(() => isImport && action.loading, [action]),
+    hasError = _react.default.useMemo(() => isImport && action.error, [action]);
   const upload = _react.default.useCallback(file => {
     if (isUploading) {
       return;

@@ -8,10 +8,10 @@
 <channel>
 	<title>
 	Comments for TrackTrendy	</title>
-	<atom:link href="/comments/feed/" rel="self" type="application/rss+xml" />
-	<link>/</link>
-	<description>Privacy Friendly Analytics!</description>
-	<lastBuildDate>Thu, 28 Mar 2024 11:02:22 +0000</lastBuildDate>
+	<atom:link href="https://djaysan.github.io/static/comments/feed/" rel="self" type="application/rss+xml" />
+	<link>https://djaysan.github.io/static/</link>
+	<description></description>
+	<lastBuildDate>Tue, 13 Feb 2024 21:08:58 +0000</lastBuildDate>
 	<sy:updatePeriod>
 	hourly	</sy:updatePeriod>
 	<sy:updateFrequency>

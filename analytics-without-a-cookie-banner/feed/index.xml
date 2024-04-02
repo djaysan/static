@@ -8,9 +8,9 @@
 <channel>
 	<title>
 	Comments on: Analytics without a cookie banner	</title>
-	<atom:link href="/analytics-without-a-cookie-banner/feed/" rel="self" type="application/rss+xml" />
-	<link>/analytics-without-a-cookie-banner/</link>
-	<description>Privacy Friendly Analytics!</description>
+	<atom:link href="https://djaysan.github.io/static/analytics-without-a-cookie-banner/feed/" rel="self" type="application/rss+xml" />
+	<link>https://djaysan.github.io/static/analytics-without-a-cookie-banner/</link>
+	<description></description>
 	<lastBuildDate>Mon, 04 Dec 2023 23:45:55 +0000</lastBuildDate>
 	<sy:updatePeriod>
 	hourly	</sy:updatePeriod>

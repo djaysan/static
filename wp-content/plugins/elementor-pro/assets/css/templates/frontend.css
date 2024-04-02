@@ -3904,10 +3904,7 @@ body.elementor-default .elementor-widget-woocommerce-menu-cart.elementor-menu-ca
 .elementor-widget-woocommerce-notices .e-woocommerce-notices-wrapper.e-woocommerce-notices-wrapper-loading * {
   display: none;
 }
-.elementor-widget-woocommerce-notices .woocommerce-notices-wrapper, .elementor-widget-woocommerce-notices .woocommerce-message, .elementor-widget-woocommerce-notices .woocommerce-error, .elementor-widget-woocommerce-notices .woocommerce-info,
-.elementor-widget-woocommerce-notices .woocommerce .is-success,
-.elementor-widget-woocommerce-notices .woocommerce .is-error,
-.elementor-widget-woocommerce-notices .woocommerce .is-info {
+.elementor-widget-woocommerce-notices .woocommerce-notices-wrapper, .elementor-widget-woocommerce-notices .woocommerce-message, .elementor-widget-woocommerce-notices .woocommerce-error, .elementor-widget-woocommerce-notices .woocommerce-info {
   display: block;
 }
 .e-preview--show-hidden-elements:not(.elementor-editor-active) .elementor-widget-woocommerce-notices .e-notices-demo-notice {
@@ -5999,9 +5996,6 @@ body.rtl .elementor-widget-slides .elementor-swiper-button-prev {
 .elementor-share-buttons--color-official.elementor-share-buttons--skin-flat .elementor-share-btn_telegram, .elementor-share-buttons--color-official.elementor-share-buttons--skin-gradient .elementor-share-btn_telegram {
   background-color: #2CA5E0;
 }
-.elementor-share-buttons--color-official.elementor-share-buttons--skin-flat .elementor-share-btn_threads, .elementor-share-buttons--color-official.elementor-share-buttons--skin-gradient .elementor-share-btn_threads {
-  background-color: #000000;
-}
 .elementor-share-buttons--color-official.elementor-share-buttons--skin-flat .elementor-share-btn_twitter, .elementor-share-buttons--color-official.elementor-share-buttons--skin-gradient .elementor-share-btn_twitter {
   background-color: #1DA1F2;
 }
@@ -6016,9 +6010,6 @@ body.rtl .elementor-widget-slides .elementor-swiper-button-prev {
 }
 .elementor-share-buttons--color-official.elementor-share-buttons--skin-flat .elementor-share-btn_wordpress, .elementor-share-buttons--color-official.elementor-share-buttons--skin-gradient .elementor-share-btn_wordpress {
   background-color: #21759b;
-}
-.elementor-share-buttons--color-official.elementor-share-buttons--skin-flat .elementor-share-btn_x-twitter, .elementor-share-buttons--color-official.elementor-share-buttons--skin-gradient .elementor-share-btn_x-twitter {
-  background-color: #000000;
 }
 .elementor-share-buttons--color-official.elementor-share-buttons--skin-flat .elementor-share-btn_xing, .elementor-share-buttons--color-official.elementor-share-buttons--skin-gradient .elementor-share-btn_xing {
   background-color: #026466;
@@ -6131,12 +6122,6 @@ body.rtl .elementor-widget-slides .elementor-swiper-button-prev {
 .elementor-share-buttons--color-official.elementor-share-buttons--skin-framed .elementor-share-btn_telegram svg, .elementor-share-buttons--color-official.elementor-share-buttons--skin-boxed .elementor-share-btn_telegram svg {
   fill: #2CA5E0;
 }
-.elementor-share-buttons--color-official.elementor-share-buttons--skin-framed .elementor-share-btn_threads, .elementor-share-buttons--color-official.elementor-share-buttons--skin-boxed .elementor-share-btn_threads {
-  color: #000000;
-}
-.elementor-share-buttons--color-official.elementor-share-buttons--skin-framed .elementor-share-btn_threads svg, .elementor-share-buttons--color-official.elementor-share-buttons--skin-boxed .elementor-share-btn_threads svg {
-  fill: #000000;
-}
 .elementor-share-buttons--color-official.elementor-share-buttons--skin-framed .elementor-share-btn_twitter, .elementor-share-buttons--color-official.elementor-share-buttons--skin-boxed .elementor-share-btn_twitter {
   color: #1DA1F2;
 }
@@ -6166,12 +6151,6 @@ body.rtl .elementor-widget-slides .elementor-swiper-button-prev {
 }
 .elementor-share-buttons--color-official.elementor-share-buttons--skin-framed .elementor-share-btn_wordpress svg, .elementor-share-buttons--color-official.elementor-share-buttons--skin-boxed .elementor-share-btn_wordpress svg {
   fill: #21759b;
-}
-.elementor-share-buttons--color-official.elementor-share-buttons--skin-framed .elementor-share-btn_x-twitter, .elementor-share-buttons--color-official.elementor-share-buttons--skin-boxed .elementor-share-btn_x-twitter {
-  color: #000000;
-}
-.elementor-share-buttons--color-official.elementor-share-buttons--skin-framed .elementor-share-btn_x-twitter svg, .elementor-share-buttons--color-official.elementor-share-buttons--skin-boxed .elementor-share-btn_x-twitter svg {
-  fill: #000000;
 }
 .elementor-share-buttons--color-official.elementor-share-buttons--skin-framed .elementor-share-btn_xing, .elementor-share-buttons--color-official.elementor-share-buttons--skin-boxed .elementor-share-btn_xing {
   color: #026466;
@@ -6233,9 +6212,6 @@ body.rtl .elementor-widget-slides .elementor-swiper-button-prev {
 .elementor-share-buttons--color-official.elementor-share-buttons--skin-boxed .elementor-share-btn_telegram .elementor-share-btn__icon, .elementor-share-buttons--color-official.elementor-share-buttons--skin-minimal .elementor-share-btn_telegram .elementor-share-btn__icon {
   background-color: #2CA5E0;
 }
-.elementor-share-buttons--color-official.elementor-share-buttons--skin-boxed .elementor-share-btn_threads .elementor-share-btn__icon, .elementor-share-buttons--color-official.elementor-share-buttons--skin-minimal .elementor-share-btn_threads .elementor-share-btn__icon {
-  background-color: #000000;
-}
 .elementor-share-buttons--color-official.elementor-share-buttons--skin-boxed .elementor-share-btn_twitter .elementor-share-btn__icon, .elementor-share-buttons--color-official.elementor-share-buttons--skin-minimal .elementor-share-btn_twitter .elementor-share-btn__icon {
   background-color: #1DA1F2;
 }
@@ -6250,9 +6226,6 @@ body.rtl .elementor-widget-slides .elementor-swiper-button-prev {
 }
 .elementor-share-buttons--color-official.elementor-share-buttons--skin-boxed .elementor-share-btn_wordpress .elementor-share-btn__icon, .elementor-share-buttons--color-official.elementor-share-buttons--skin-minimal .elementor-share-btn_wordpress .elementor-share-btn__icon {
   background-color: #21759b;
-}
-.elementor-share-buttons--color-official.elementor-share-buttons--skin-boxed .elementor-share-btn_x-twitter .elementor-share-btn__icon, .elementor-share-buttons--color-official.elementor-share-buttons--skin-minimal .elementor-share-btn_x-twitter .elementor-share-btn__icon {
-  background-color: #000000;
 }
 .elementor-share-buttons--color-official.elementor-share-buttons--skin-boxed .elementor-share-btn_xing .elementor-share-btn__icon, .elementor-share-buttons--color-official.elementor-share-buttons--skin-minimal .elementor-share-btn_xing .elementor-share-btn__icon {
   background-color: #026466;
@@ -6832,11 +6805,11 @@ body.rtl .elementor-widget-slides .elementor-swiper-button-prev {
   height: 36px;
 }
 .elementor-widget-reviews .elementor-testimonial__icon {
-  margin-inline-start: auto;
+  margin-left: auto;
   font-size: 17px;
 }
 .elementor-widget-reviews .elementor-testimonial__icon .fa + .fa {
-  margin-inline-start: 0.15em;
+  margin-left: 0.15em;
 }
 .elementor-widget-reviews .elementor-testimonial__icon.elementor-icon {
   color: var(--e-testimonial-icon-color);
@@ -6952,9 +6925,6 @@ body.rtl .elementor-widget-slides .elementor-swiper-button-prev {
 .elementor-widget-reviews .elementor-testimonial__icon.elementor-icon-thumb-tack, .elementor-widget-reviews .elementor-testimonial__icon.elementor-icon-thumbtack {
   --e-testimonial-icon-color: #1aa1d8;
 }
-.elementor-widget-reviews .elementor-testimonial__icon.elementor-icon-threads {
-  --e-testimonial-icon-color: #000000;
-}
 .elementor-widget-reviews .elementor-testimonial__icon.elementor-icon-tripadvisor {
   --e-testimonial-icon-color: #589442;
 }
@@ -6985,9 +6955,6 @@ body.rtl .elementor-widget-slides .elementor-swiper-button-prev {
 .elementor-widget-reviews .elementor-testimonial__icon.elementor-icon-wordpress {
   --e-testimonial-icon-color: #21759b;
 }
-.elementor-widget-reviews .elementor-testimonial__icon.elementor-icon-x {
-  --e-testimonial-icon-color: #000000;
-}
 .elementor-widget-reviews .elementor-testimonial__icon.elementor-icon-xing {
   --e-testimonial-icon-color: #026466;
 }
@@ -7009,28 +6976,28 @@ body.rtl .elementor-widget-slides .elementor-swiper-button-prev {
 }
 .elementor-widget-reviews .elementor-testimonial__header {
   display: flex;
-  padding-block-start: 15px;
-  padding-block-end: 6px;
+  padding-top: 15px;
+  padding-bottom: 6px;
 }
 .elementor-widget-reviews .elementor-testimonial__image + cite {
-  margin-inline-start: 9px;
+  margin-left: 9px;
 }
 .elementor-widget-reviews .elementor-testimonial__separator {
   margin: 0 auto;
-  border-block-start: 0 none;
-  border-block-end: 1px solid #e1e8ed;
+  border-top: 0 none;
+  border-bottom: 1px solid #e1e8ed;
   height: 0;
 }
 .elementor-widget-reviews .elementor-testimonial__content {
-  padding-block-start: 6px;
-  padding-block-end: 15px;
+  padding-top: 6px;
+  padding-bottom: 15px;
 }
 .elementor-widget-reviews .elementor-testimonial__content, .elementor-widget-reviews .elementor-testimonial__header {
-  padding-inline-start: 15px;
-  padding-inline-end: 15px;
+  padding-left: 15px;
+  padding-right: 15px;
 }
 .elementor-widget-reviews.elementor-review--has-separator .elementor-testimonial__header {
-  border-block-end: 1px solid #e1e8ed;
+  border-bottom: 1px solid #e1e8ed;
 }
 
 .swiper-pagination-bullets {
@@ -8456,23 +8423,9 @@ body.rtl .elementor-widget-slides .elementor-swiper-button-prev {
 .elementor-nav-menu__align-left .elementor-nav-menu--layout-vertical > ul > li > a {
   justify-content: flex-start;
 }
-.elementor-nav-menu__align-start .elementor-nav-menu {
-  margin-inline-end: auto;
-  justify-content: flex-start;
-}
-.elementor-nav-menu__align-start .elementor-nav-menu--layout-vertical > ul > li > a {
-  justify-content: flex-start;
-}
-.elementor-nav-menu__align-end .elementor-nav-menu {
-  margin-inline-start: auto;
-  justify-content: flex-end;
-}
-.elementor-nav-menu__align-end .elementor-nav-menu--layout-vertical > ul > li > a {
-  justify-content: flex-end;
-}
 .elementor-nav-menu__align-center .elementor-nav-menu {
-  margin-inline-start: auto;
-  margin-inline-end: auto;
+  margin-left: auto;
+  margin-right: auto;
   justify-content: center;
 }
 .elementor-nav-menu__align-center .elementor-nav-menu--layout-vertical > ul > li > a {
@@ -8955,7 +8908,6 @@ a.elementor-item.elementor-gallery-title.elementor-item-active {
   font-size: 18px;
   margin: 0;
   color: var(--header-color);
-  flex-grow: 1;
 }
 .elementor-toc__toggle-button {
   cursor: pointer;
@@ -9006,9 +8958,6 @@ a.elementor-item.elementor-gallery-title.elementor-item-active {
   margin-top: 0.5em;
   margin-left: var(--nested-list-indent, 1em);
 }
-.elementor-toc__list-item-text {
-  transition-duration: var(--item-text-transition-duration);
-}
 .elementor-toc__list-item-text:hover {
   color: var(--item-text-hover-color);
   text-decoration: var(--item-text-hover-decoration);
@@ -9052,7 +9001,6 @@ a.elementor-item.elementor-gallery-title.elementor-item-active {
 .elementor-toc__body .elementor-toc__list-item-text {
   color: var(--item-text-color);
   text-decoration: var(--item-text-decoration);
-  transition-duration: var(--item-text-transition-duration);
 }
 .elementor-toc__body .elementor-toc__list-item-text:hover {
   color: var(--item-text-hover-color);
@@ -10209,12 +10157,6 @@ ol.elementor-toc__list-wrapper .elementor-toc__list-item-text-wrapper:before {
   --n-menu-icon-order: initial;
   --n-menu-icon-gap: 5px;
   --n-menu-dropdown-icon-gap: 5px;
-  --n-menu-dropdown-indicator-size: initial;
-  --n-menu-dropdown-indicator-rotate: initial;
-  --n-menu-dropdown-indicator-space: initial;
-  --n-menu-dropdown-indicator-color-normal: initial;
-  --n-menu-dropdown-indicator-color-hover: initial;
-  --n-menu-dropdown-indicator-color-active: initial;
   --n-menu-dropdown-content-max-width: initial;
   --n-menu-dropdown-content-box-border-color: #ffffff;
   --n-menu-dropdown-content-box-border-inline-start-width: medium;
@@ -10322,7 +10264,6 @@ ol.elementor-toc__list-wrapper .elementor-toc__list-item-text-wrapper:before {
   white-space: nowrap;
   user-select: none;
   margin: initial;
-  gap: var(--n-menu-dropdown-indicator-space);
 }
 .elementor-widget-n-menu .e-n-menu-title.e-click, .elementor-widget-n-menu .e-n-menu-title.e-click * {
   cursor: pointer;
@@ -10383,17 +10324,17 @@ ol.elementor-toc__list-wrapper .elementor-toc__list-item-text-wrapper:before {
   width: fit-content;
   margin-inline-start: var(--n-menu-dropdown-icon-gap);
   transition: all var(--n-menu-title-transition);
-  transform: var(--n-menu-dropdown-indicator-rotate);
 }
 .elementor-widget-n-menu .e-n-menu-title .e-n-menu-dropdown-icon span i {
-  font-size: var(--n-menu-dropdown-indicator-size, var(--n-menu-title-font-size));
-  width: var(--n-menu-dropdown-indicator-size, var(--n-menu-title-font-size));
+  font-size: var(--n-menu-title-font-size);
+  width: var(--n-menu-title-font-size);
   transition: all var(--n-menu-title-transition);
 }
 .elementor-widget-n-menu .e-n-menu-title .e-n-menu-dropdown-icon span svg {
-  width: var(--n-menu-dropdown-indicator-size, var(--n-menu-title-font-size));
-  height: var(--n-menu-dropdown-indicator-size, var(--n-menu-title-font-size));
+  width: var(--n-menu-title-font-size);
+  height: var(--n-menu-title-font-size);
   transition: all var(--n-menu-title-transition);
+  fill: var(--n-menu-title-color-normal);
 }
 .elementor-widget-n-menu .e-n-menu-title .e-n-menu-dropdown-icon[aria-expanded=false] .e-n-menu-dropdown-icon-opened {
   display: none;
@@ -10415,12 +10356,6 @@ ol.elementor-toc__list-wrapper .elementor-toc__list-item-text-wrapper:before {
 }
 .elementor-widget-n-menu .e-n-menu-title:not(.e-current):not(:hover) .e-n-menu-icon svg {
   fill: var(--n-menu-icon-color);
-}
-.elementor-widget-n-menu .e-n-menu-title:not(.e-current):not(:hover) .e-n-menu-dropdown-icon i {
-  color: var(--n-menu-dropdown-indicator-color-normal, var(--n-menu-title-color-normal));
-}
-.elementor-widget-n-menu .e-n-menu-title:not(.e-current):not(:hover) .e-n-menu-dropdown-icon svg {
-  fill: var(--n-menu-dropdown-indicator-color-normal, var(--n-menu-title-color-normal));
 }
 .elementor-widget-n-menu .e-n-menu-title:not(.e-current) .icon-active {
   transform: translate(0, -100%);
@@ -10445,12 +10380,6 @@ ol.elementor-toc__list-wrapper .elementor-toc__list-item-text-wrapper:before {
 .elementor-widget-n-menu .e-n-menu-title.e-current .e-n-menu-icon span > svg {
   fill: var(--n-menu-icon-color-active);
 }
-.elementor-widget-n-menu .e-n-menu-title.e-current .e-n-menu-dropdown-icon i {
-  color: var(--n-menu-dropdown-indicator-color-active, var(--n-menu-title-color-active));
-}
-.elementor-widget-n-menu .e-n-menu-title.e-current .e-n-menu-dropdown-icon svg {
-  fill: var(--n-menu-dropdown-indicator-color-active, var(--n-menu-title-color-active));
-}
 .elementor-widget-n-menu .e-n-menu-title:hover:not(.e-current) .e-n-menu-title-text:not(.e-link) {
   cursor: default;
 }
@@ -10468,12 +10397,6 @@ ol.elementor-toc__list-wrapper .elementor-toc__list-item-text-wrapper:before {
 }
 .elementor-widget-n-menu .e-n-menu-title:hover:not(.e-current) .e-n-menu-icon svg {
   fill: var(--n-menu-icon-color-hover);
-}
-.elementor-widget-n-menu .e-n-menu-title:hover:not(.e-current) .e-n-menu-dropdown-icon i {
-  color: var(--n-menu-dropdown-indicator-color-hover, var(--n-menu-title-color-hover));
-}
-.elementor-widget-n-menu .e-n-menu-title:hover:not(.e-current) .e-n-menu-dropdown-icon svg {
-  fill: var(--n-menu-dropdown-indicator-color-hover, var(--n-menu-title-color-hover));
 }
 .elementor-widget-n-menu .e-n-menu-toggle {
   all: unset;
@@ -10597,20 +10520,17 @@ ol.elementor-toc__list-wrapper .elementor-toc__list-item-text-wrapper:before {
   color: var(--n-menu-title-normal-color-dropdown);
 }
 .elementor-widget-n-menu .e-n-menu[data-layout=dropdown] .e-n-menu-title:not(.e-current) .e-n-menu-dropdown-icon i {
-  color: var(--n-menu-dropdown-indicator-color-normal, var(--n-menu-title-normal-color-dropdown));
+  color: var(--n-menu-title-normal-color-dropdown);
 }
 .elementor-widget-n-menu .e-n-menu[data-layout=dropdown] .e-n-menu-title:not(.e-current) .e-n-menu-dropdown-icon svg {
-  fill: var(--n-menu-dropdown-indicator-color-normal, var(--n-menu-title-normal-color-dropdown));
+  fill: var(--n-menu-title-normal-color-dropdown);
 }
 .elementor-widget-n-menu .e-n-menu[data-layout=dropdown] .e-n-menu-title.e-current,
 .elementor-widget-n-menu .e-n-menu[data-layout=dropdown] .e-n-menu-title.e-current a {
   color: var(--n-menu-title-active-color-dropdown);
 }
-.elementor-widget-n-menu .e-n-menu[data-layout=dropdown] .e-n-menu-title.e-current .e-n-menu-dropdown-icon i {
-  color: var(--n-menu-dropdown-indicator-color-active, var(--n-menu-title-active-color-dropdown));
-}
-.elementor-widget-n-menu .e-n-menu[data-layout=dropdown] .e-n-menu-title.e-current .e-n-menu-dropdown-icon svg {
-  fill: var(--n-menu-dropdown-indicator-color-active, var(--n-menu-title-active-color-dropdown));
+.elementor-widget-n-menu .e-n-menu[data-layout=dropdown] .e-n-menu-title.e-current .e-n-menu-dropdown-icon span svg {
+  fill: var(--n-menu-title-active-color-dropdown);
 }
 .elementor-widget-n-menu .e-n-menu[data-layout=dropdown] .e-n-menu-content {
   overflow: hidden;

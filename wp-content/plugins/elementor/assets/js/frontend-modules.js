@@ -1,4 +1,4 @@
-/*! elementor - v3.20.0 - 26-03-2024 */
+/*! elementor - v3.18.0 - 08-12-2023 */
 (self["webpackChunkelementor"] = self["webpackChunkelementor"] || []).push([["frontend-modules"],{
 
 /***/ "../assets/dev/js/editor/utils/is-instanceof.js":
@@ -446,6 +446,7 @@ class CarouselHandlerBase extends _baseSwiper.default {
     if (isNestedCarouselInEditMode || !offsetSide || 'none' === offsetSide) {
       return;
     }
+    const offset = this.getOffsetWidth();
     switch (offsetSide) {
       case 'right':
         this.forceSliderToShowNextSlideWhenOnLast(swiperOptions, slidesToShow);
@@ -843,7 +844,7 @@ module.exports = elementorModules.ViewModule.extend({
       if (!settingsKeys) {
         settingsKeys = elementorFrontend.config.elements.keys[type] = [];
         jQuery.each(settings.controls, (name, control) => {
-          if (control.frontend_available || control.editor_available) {
+          if (control.frontend_available) {
             settingsKeys.push(name);
           }
         });
@@ -1278,6 +1279,7 @@ class ArgsObject extends _instanceType.default {
    * @param {{}}     args
    *
    * @throws {Error}
+   *
    */
   requireArgument(property) {
     let args = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.args;
@@ -1296,6 +1298,7 @@ class ArgsObject extends _instanceType.default {
    * @param {{}}     args
    *
    * @throws {Error}
+   *
    */
   requireArgumentType(property, type) {
     let args = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this.args;
@@ -1315,6 +1318,7 @@ class ArgsObject extends _instanceType.default {
    * @param {{}}     args
    *
    * @throws {Error}
+   *
    */
   requireArgumentInstance(property, instance) {
     let args = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this.args;
@@ -1334,6 +1338,7 @@ class ArgsObject extends _instanceType.default {
    * @param {{}}     args
    *
    * @throws {Error}
+   *
    */
   requireArgumentConstructor(property, type) {
     let args = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this.args;

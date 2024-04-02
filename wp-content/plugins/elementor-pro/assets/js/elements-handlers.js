@@ -1,4 +1,4 @@
-/*! elementor-pro - v3.20.0 - 26-03-2024 */
+/*! elementor-pro - v3.18.0 - 06-12-2023 */
 "use strict";
 (self["webpackChunkelementor_pro"] = self["webpackChunkelementor_pro"] || []).push([["elements-handlers"],{
 
@@ -666,7 +666,9 @@ class BaseFilterFrontendModule extends elementorModules.Module {
         return {};
       }
       return response.json();
-    }).catch(() => {
+    })
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    .catch(error => {
       return {};
     }).then(response => {
       if (!response?.data && '' !== response?.data) {
@@ -676,9 +678,6 @@ class BaseFilterFrontendModule extends elementorModules.Module {
         newWidgetContainer = this.createElementFromHTMLString(response.data);
       widget.replaceChild(newWidgetContainer, existingWidgetContainer);
       this.handleElementHandlers(newWidgetContainer);
-      if (elementorFrontend.config.experimentalFeatures.e_lazyload) {
-        document.dispatchEvent(new Event('elementor/lazyload/observe'));
-      }
       elementorFrontend.elementsHandler.runReadyTrigger(document.querySelector(`.elementor-element-${widgetId}`));
       widget.classList.remove('e-loading');
     }).finally(() => {
@@ -1091,12 +1090,12 @@ class _default extends elementorModules.frontend.Document {
     if (!$focusableElements.length) {
       return;
     }
-    let lastButtonClicked = null;
+    let $lastButtonClicked = null;
     if (event?.currentTarget) {
-      lastButtonClicked = event.currentTarget;
+      $lastButtonClicked = jQuery(event.currentTarget);
     }
-    const lastFocusableElement = $focusableElements[$focusableElements.length - 1];
-    const firstFocusableElement = $focusableElements[0];
+    const $lastFocusableElement = $focusableElements[$focusableElements.length - 1];
+    const $firstFocusableElement = $focusableElements[0];
     const onKeyDownPressed = keyDownEvent => {
       const TAB_KEY = 9;
       const isShiftPressed = keyDownEvent.shiftKey;
@@ -1106,25 +1105,25 @@ class _default extends elementorModules.frontend.Document {
       }
       const activeElement = elementorFrontend.elements.window.document.activeElement;
       if (isShiftPressed) {
-        const isFocusOnFirstElement = activeElement === firstFocusableElement;
+        const isFocusOnFirstElement = activeElement === $firstFocusableElement;
         if (isFocusOnFirstElement) {
-          lastFocusableElement.focus();
+          $lastFocusableElement.focus();
           keyDownEvent.preventDefault();
         }
       } else {
-        const isFocusOnLastElement = activeElement === lastFocusableElement;
+        const isFocusOnLastElement = activeElement === $lastFocusableElement;
         if (isFocusOnLastElement) {
-          firstFocusableElement.focus();
+          $firstFocusableElement.focus();
           keyDownEvent.preventDefault();
         }
       }
     };
-    firstFocusableElement.focus();
+    $firstFocusableElement.focus();
     const $window = elementorFrontend.elements.$window;
     $window.on('keydown', onKeyDownPressed).on('elementor/popup/hide', () => {
       $window.off('keydown', onKeyDownPressed);
-      if (lastButtonClicked) {
-        lastButtonClicked.focus();
+      if ($lastButtonClicked) {
+        $lastButtonClicked.focus();
       }
     });
   }

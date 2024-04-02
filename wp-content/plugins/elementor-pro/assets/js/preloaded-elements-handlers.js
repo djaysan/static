@@ -1,4 +1,4 @@
-/*! elementor-pro - v3.20.0 - 26-03-2024 */
+/*! elementor-pro - v3.18.0 - 06-12-2023 */
 (self["webpackChunkelementor_pro"] = self["webpackChunkelementor_pro"] || []).push([["preloaded-elements-handlers"],{
 
 /***/ "../assets/dev/js/frontend/preloaded-elements-handlers.js":
@@ -1478,7 +1478,7 @@ var _default = exports["default"] = elementorModules.frontend.handlers.Base.exte
           self.cache.$countDown.hide();
           break;
         case 'redirect':
-          if (action.redirect_url && action.redirect_url.startsWith('http')) {
+          if (action.redirect_url) {
             window.location.href = action.redirect_url;
           }
           break;
@@ -3066,9 +3066,6 @@ class AjaxPagination extends elementorModules.frontend.handlers.Base {
       postsElements = document.querySelectorAll(`[data-id="${this.elementId}"] ${selectors.postWrapperTag}`);
     elementorFrontend.elementsHandler.runReadyTrigger(this.$element[0]);
     (0, _runElementHandlers.default)(postsElements);
-    if (elementorFrontend.config.experimentalFeatures.e_lazyload) {
-      document.dispatchEvent(new Event('elementor/lazyload/observe'));
-    }
   }
   onInit() {
     super.onInit();
@@ -3109,10 +3106,21 @@ class LoopLoadMore extends _loadMore.default {
   afterInsertPosts(postsElements, result) {
     super.afterInsertPosts(postsElements);
     if (elementorFrontend.config.experimentalFeatures.e_lazyload) {
-      document.dispatchEvent(new Event('elementor/lazyload/observe'));
+      this.handleLazyloadBackgroundElements();
     }
     this.handleDynamicStyleElements(result);
     (0, _runElementHandlers.default)(postsElements);
+  }
+
+  /**
+   * Handle Lazyload Background Elements.
+   *
+   * Add's the `lazyload` class to the newly added dom elements that use the Lazyload Background feature.
+   */
+  handleLazyloadBackgroundElements() {
+    document.querySelectorAll(`[data-id="${this.elementId}"] [data-e-bg-lazyload]:not(.lazyloaded)`).forEach(element => {
+      element.classList.add('lazyloaded');
+    });
   }
 
   /**
@@ -3644,7 +3652,9 @@ class BaseFilterFrontendModule extends elementorModules.Module {
         return {};
       }
       return response.json();
-    }).catch(() => {
+    })
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    .catch(error => {
       return {};
     }).then(response => {
       if (!response?.data && '' !== response?.data) {
@@ -3654,9 +3664,6 @@ class BaseFilterFrontendModule extends elementorModules.Module {
         newWidgetContainer = this.createElementFromHTMLString(response.data);
       widget.replaceChild(newWidgetContainer, existingWidgetContainer);
       this.handleElementHandlers(newWidgetContainer);
-      if (elementorFrontend.config.experimentalFeatures.e_lazyload) {
-        document.dispatchEvent(new Event('elementor/lazyload/observe'));
-      }
       elementorFrontend.elementsHandler.runReadyTrigger(document.querySelector(`.elementor-element-${widgetId}`));
       widget.classList.remove('e-loading');
     }).finally(() => {
@@ -4910,7 +4917,6 @@ class MegaMenu extends elementorModules.frontend.handlers.NestedTabs {
     }
     this.resizeListener = null;
     this.prevMouseY = null;
-    this.isKeyboardNavigation = false;
   }
   getDefaultSettings() {
     const settings = super.getDefaultSettings();
@@ -4944,11 +4950,6 @@ class MegaMenu extends elementorModules.frontend.handlers.NestedTabs {
     elements.$anchorLink = this.$element.find(selectors.anchorLink);
     return elements;
   }
-  setKeyboardNavigation(event) {
-    if ('Tab' === event.key) {
-      this.isKeyboardNavigation = true;
-    }
-  }
   dropdownMenuHeightControllerConfig() {
     const selectors = this.getSettings('selectors');
     return {
@@ -4972,7 +4973,7 @@ class MegaMenu extends elementorModules.frontend.handlers.NestedTabs {
 
     // If no container is passed as an argument, check if there is an active container.
     const activeTitleSelector = this.getSettings('ariaAttributes').activeTitleSelector,
-      tabIndex = this.elements.$tabDropdowns.filter(activeTitleSelector).attr('data-tab-index');
+      tabIndex = this.elements.$tabDropdowns.filter(activeTitleSelector)?.attr('data-tab-index');
     $contentContainer = $contentContainer || this.elements.$tabContents.filter(this.getTabContentFilterSelector(tabIndex));
     if (!$contentContainer.length) {
       return;
@@ -5141,7 +5142,7 @@ class MegaMenu extends elementorModules.frontend.handlers.NestedTabs {
     }
     this.menuHeightController.reassignMenuHeight($requestedContent);
   }
-  deactivateActiveTab() {
+  deactivateActiveTab(newTabIndex) {
     const settings = this.getSettings(),
       activeClass = settings.classes.active,
       activeTitleFilter = settings.ariaAttributes.activeTitleSelector,
@@ -5149,7 +5150,7 @@ class MegaMenu extends elementorModules.frontend.handlers.NestedTabs {
       $activeTitle = this.elements.$tabDropdowns.filter(activeTitleFilter),
       $activeContent = this.elements.$tabContents.filter(activeContentFilter),
       $menuContent = this.elements.$menuContent;
-    this.setTabDeactivationAttributes($activeTitle);
+    this.setTabDeactivationAttributes($activeTitle, newTabIndex);
     $activeContent.removeClass(activeClass);
     $activeContent[settings.hideTabFn](0, () => this.onHideTabContent($activeContent));
     this.removeAnimationFromContentIfNeeded();
@@ -5161,15 +5162,22 @@ class MegaMenu extends elementorModules.frontend.handlers.NestedTabs {
   }
   getTitleActivationAttributes() {
     let elementType = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'tab';
-    const titleAttributes = {};
+    const titleAttributes = {
+      tabindex: '0'
+    };
     if ('tab' === elementType) {
       titleAttributes['aria-expanded'] = 'true';
     }
     return titleAttributes;
   }
-  setTabDeactivationAttributes($activeTitle) {
-    const titleStateAttribute = this.getSettings('ariaAttributes').titleStateAttribute;
+  setTabDeactivationAttributes($activeTitle, newTabIndex) {
+    const isActiveTab = this.isActiveTab(newTabIndex),
+      titleStateAttribute = this.getSettings('ariaAttributes').titleStateAttribute;
     $activeTitle.attr(`${titleStateAttribute}`, 'false');
+    if (!!newTabIndex && !isActiveTab) {
+      this.elements.$tabDropdowns.attr('tabindex', '-1');
+      this.elements.$tabDropdowns.prev('.e-n-menu-title-container').find('a').attr('tabindex', '-1');
+    }
   }
   shouldPositionContentAbove($contentContainer) {
     let offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
@@ -5194,7 +5202,7 @@ class MegaMenu extends elementorModules.frontend.handlers.NestedTabs {
   changeActiveTab(tabIndex) {
     let fromUser = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
     const isActiveTab = this.isActiveTab(tabIndex);
-    this.deactivateActiveTab();
+    this.deactivateActiveTab(tabIndex);
     if (!isActiveTab || isActiveTab && !fromUser) {
       this.activateTab(tabIndex);
     }
@@ -5216,16 +5224,7 @@ class MegaMenu extends elementorModules.frontend.handlers.NestedTabs {
     event.stopPropagation();
   }
   onTabClick(event) {
-    if (elementorFrontend.isEditMode()) {
-      event.preventDefault();
-    }
-    const hasNoDropdown = event?.currentTarget?.classList?.contains('link-only');
-
-    // Tweak for NVDA screen reader with Windows Edge.
-    // Ref: https://github.com/nvaccess/nvda/issues/7898
-    const dropdownOpensWithHover = !this.isNeedToOpenOnClick(),
-      blockMouseClickEvents = dropdownOpensWithHover && !this.isKeyboardNavigation;
-    if (hasNoDropdown || blockMouseClickEvents) {
+    if (event?.currentTarget?.classList?.contains('link-only')) {
       return;
     }
     const getClickedMenuId = event?.target?.closest('.elementor-widget-n-menu')?.getAttribute('data-id'),
@@ -5274,7 +5273,7 @@ class MegaMenu extends elementorModules.frontend.handlers.NestedTabs {
     this.menuHeightController.reassignMobileMenuHeight();
     this.setScrollPosition();
     const activeTitleSelector = this.getSettings('ariaAttributes').activeTitleSelector,
-      tabIndex = this.elements.$tabDropdowns.filter(activeTitleSelector).attr('data-tab-index'),
+      tabIndex = this.elements.$tabDropdowns.filter(activeTitleSelector)?.attr('data-tab-index'),
       childMenuContentSelector = `.elementor-element-${this.getID()} .e-n-menu .e-n-menu .e-n-menu-content > .e-con`,
       $requestedContent = this.elements.$tabContents.filter(this.getTabContentFilterSelector(tabIndex)).not(childMenuContentSelector);
     this.menuHeightController.resetMenuHeight($requestedContent);
@@ -5331,9 +5330,9 @@ class MegaMenu extends elementorModules.frontend.handlers.NestedTabs {
     return mobileDevices.includes(elementorFrontend.getCurrentDeviceMode());
   }
   replaceClickWithHover(tabEvents) {
+    delete tabEvents.click;
     tabEvents.mouseenter = this.onMouseTitleEnter.bind(this);
     tabEvents.mouseleave = this.onMouseLeave.bind(this);
-    tabEvents.keyup = this.setKeyboardNavigation.bind(this);
     return tabEvents;
   }
   onMouseTitleEnter(event) {
@@ -5347,6 +5346,7 @@ class MegaMenu extends elementorModules.frontend.handlers.NestedTabs {
       return;
     }
     const tabIndex = activeDropdownElement?.getAttribute('data-tab-index');
+    this.resetTabindexAttributes();
     this.changeActiveTab(tabIndex, true);
   }
   onClickToggleDropdownMenu(show) {
@@ -5466,7 +5466,7 @@ class MegaMenu extends elementorModules.frontend.handlers.NestedTabs {
     event.preventDefault();
     const isMouseLeavingTabContent = event?.currentTarget?.classList?.contains('e-con');
     if (!this.isHoveredDropdownMenu(isMouseLeavingTabContent, event)) {
-      this.deactivateActiveTab();
+      this.deactivateActiveTab('', 'mouseLeave');
     }
   }
   onInit() {
@@ -5534,6 +5534,9 @@ class MegaMenu extends elementorModules.frontend.handlers.NestedTabs {
     }
     this.setLayoutType();
   }
+  resetTabindexAttributes() {
+    this.elements.$tabDropdowns.attr('tabindex', '-1');
+  }
 
   /**
    * Sets the layout type as a data attribute, so that it can be use for the responsive or dropdown menu styling.
@@ -5548,10 +5551,10 @@ class MegaMenu extends elementorModules.frontend.handlers.NestedTabs {
   getHeadingEvents() {
     const navigationWrapper = this.elements.$headingContainer[0];
     return {
-      mousedown: this.changeScrollStatusAndDispatch.bind(this, navigationWrapper),
-      mouseup: this.changeScrollStatusAndDispatch.bind(this, navigationWrapper),
-      mouseleave: this.changeScrollStatusAndDispatch.bind(this, navigationWrapper),
-      mousemove: this.setHorizontalTitleScrollValuesAndDispatch.bind(this, navigationWrapper)
+      mousedown: _flexHorizontalScroll.changeScrollStatus.bind(this, navigationWrapper),
+      mouseup: _flexHorizontalScroll.changeScrollStatus.bind(this, navigationWrapper),
+      mouseleave: _flexHorizontalScroll.changeScrollStatus.bind(this, navigationWrapper),
+      mousemove: _flexHorizontalScroll.setHorizontalTitleScrollValues.bind(this, navigationWrapper, this.getHorizontalScrollSetting())
     };
   }
   getHorizontalScrollSetting() {
@@ -5561,14 +5564,6 @@ class MegaMenu extends elementorModules.frontend.handlers.NestedTabs {
   getItemPosition() {
     const currentDevice = elementorFrontend.getCurrentDeviceMode();
     return elementorFrontend.utils.controls.getResponsiveControlValue(this.getElementSettings(), 'item_position_horizontal', '', currentDevice);
-  }
-  changeScrollStatusAndDispatch(navigationWrapper, event) {
-    (0, _flexHorizontalScroll.changeScrollStatus)(navigationWrapper, event);
-    elementorFrontend.elements.$window.trigger('elementor-pro/mega-menu/heading-mouse-event');
-  }
-  setHorizontalTitleScrollValuesAndDispatch(navigationWrapper, event) {
-    (0, _flexHorizontalScroll.setHorizontalTitleScrollValues)(navigationWrapper, this.getHorizontalScrollSetting(), event);
-    elementorFrontend.elements.$window.trigger('elementor-pro/mega-menu/heading-mouse-event');
   }
 }
 exports["default"] = MegaMenu;
@@ -5588,86 +5583,49 @@ Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
 exports["default"] = void 0;
-class MenuTitleKeyboardHandler extends elementorModules.frontend.handlers.Base {
+class MenuTitleKeyboardHandler extends elementorModules.frontend.handlers.NestedTitleKeyboardHandler {
   __construct() {
     super.__construct(...arguments);
-    this.focusableElementSelector = 'audio, button, canvas, details, iframe, input, select, summary, textarea, video, [accesskey], [contenteditable], a[href], area[href], [tabindex]';
     this.handleMenuToggleKeydown = this.handleMenuToggleKeydown.bind(this);
   }
   getDefaultSettings() {
-    return {
-      selectors: {
-        widgetInnerWrapper: '.e-n-menu',
-        menuItemWrapper: '.e-n-menu-title',
-        menuItemElement: '.e-focus',
-        itemContainer: '.e-n-menu-content > .e-con',
-        menuToggle: '.e-n-menu-toggle'
-      },
-      ariaAttributes: {
-        titleStateAttribute: 'aria-expanded',
-        activeTitleSelector: '[aria-expanded="true"]',
-        titleControlAttribute: 'aria-controls'
-      },
-      datasets: {
-        titleIndex: 'data-focus-index'
-      }
-    };
+    const settings = super.getDefaultSettings();
+    settings.selectors.widgetInnerWrapper = '.e-n-menu';
+    settings.selectors.menuToggle = '.e-n-menu-toggle';
+    settings.selectors.itemTitle = '.e-focus';
+    settings.selectors.itemContainer = '.e-n-menu-content > .e-con';
+    settings.ariaAttributes.titleStateAttribute = 'aria-expanded';
+    settings.ariaAttributes.activeTitleSelector = '[aria-expanded="true"]';
+    settings.datasets.titleIndex = 'data-focus-index';
+    return settings;
   }
   getDefaultElements() {
-    const selectors = this.getSettings('selectors');
-    return {
-      $menuItemWrappers: this.findElement(selectors.menuItemWrapper),
-      $menuItemElements: this.findElement(selectors.menuItemElement),
-      $itemContainers: this.findElement(selectors.itemContainer),
-      $focusableContainerElements: this.getFocusableElements(this.findElement(selectors.itemContainer)),
-      $menuToggle: this.findElement(selectors.menuToggle)
-    };
+    const elements = super.getDefaultElements(),
+      selectors = this.getSettings('selectors');
+    elements.$menuToggle = this.findElement(selectors.menuToggle);
+    return elements;
   }
-  getFocusableElements($elements) {
-    return $elements.find(this.focusableElementSelector).not('[disabled], [inert], [tabindex="-1"]');
+  bindEvents() {
+    super.bindEvents();
+    this.elements.$menuToggle.on('keydown', this.handleMenuToggleKeydown);
   }
-  getTitleIndex(menuItemElement) {
-    const {
-      titleIndex: indexAttribute
-    } = this.getSettings('datasets');
-    return parseInt(menuItemElement?.getAttribute(indexAttribute));
-  }
-  getTitleFilterSelector(titleIndex) {
-    const {
-      titleIndex: indexAttribute
-    } = this.getSettings('datasets');
-    return `[${indexAttribute}="${titleIndex}"]`;
-  }
-  getActiveTitleElement() {
-    const activeTitleFilter = this.getSettings('ariaAttributes').activeTitleSelector;
-    return this.elements.$menuItemElements.filter(activeTitleFilter);
+  unbindEvents() {
+    super.unbindEvents();
+    this.elements.$menuToggle.off('keydown', this.handleMenuToggleKeydown);
   }
   onInit() {
     super.onInit(...arguments);
     let focusTitleCount = 1;
-    this.elements.$menuItemElements.each((index, title) => {
+    this.elements.$itemTitles.each((index, title) => {
       title.setAttribute(this.getSettings('datasets').titleIndex, focusTitleCount++);
     });
   }
-  getTitleEvents() {
-    return {
-      keydown: this.handleTitleKeyboardNavigation.bind(this)
-    };
-  }
-  getContentElementEvents() {
-    return {
-      keydown: this.handleContentElementKeyboardNavigation.bind(this)
-    };
-  }
-  bindEvents() {
-    this.elements.$menuItemElements.on(this.getTitleEvents());
-    this.elements.$focusableContainerElements.on(this.getContentElementEvents());
-    this.elements.$menuToggle.on('keydown', this.handleMenuToggleKeydown);
-  }
-  unbindEvents() {
-    this.elements.$menuItemElements.off();
-    this.elements.$focusableContainerElements.off(this.getContentElementEvents());
-    this.elements.$menuToggle.off('keydown', this.handleMenuToggleKeydown);
+  setTitleTabindex(titleIndex) {
+    this.elements.$itemTitles.attr('tabindex', '-1');
+    const $newTitle = this.elements.$itemTitles.filter(this.getTitleFilterSelector(titleIndex));
+    $newTitle.attr('tabindex', '0');
+    $newTitle.closest('.e-n-menu-title-container').next('.e-n-menu-dropdown-icon').attr('tabindex', '0');
+    $newTitle.prev('.e-n-menu-title-container').find('a').attr('tabindex', '0');
   }
   handleMenuToggleKeydown(event) {
     if ('Escape' !== event.key) {
@@ -5675,175 +5633,48 @@ class MenuTitleKeyboardHandler extends elementorModules.frontend.handlers.Base {
     }
     event.preventDefault();
     event.stopPropagation();
-    this.closeMenuDropdown();
-  }
-  handleTitleKeyboardNavigation(event) {
-    switch (event.key) {
-      case 'Tab':
-        if (event.shiftKey) {
-          this.closeActiveContentElements();
-        } else {
-          this.handleTitleTab(event);
-        }
-        break;
-      case 'Home':
-      case 'End':
-        this.handleTitleHomeOrEndKey(event);
-        break;
-      case 'Enter':
-      case ' ':
-        this.handleTitleActivationKey(event);
-        break;
-      case 'Escape':
-        this.handleTitleEscapeKey(event);
-        break;
-    }
-  }
-  handleTitleTab(event) {
-    const currentTitleIndex = this.getTitleIndex(event.currentTarget);
-    this.maybeFocusMenuToggle(event, currentTitleIndex);
-    const $activeTitle = this.getActiveTitleElement(),
-      activeTitleIndex = this.getTitleIndex($activeTitle[0]) || false,
-      isActiveTitle = currentTitleIndex === activeTitleIndex,
-      activeTitleControl = $activeTitle.attr(this.getSettings('ariaAttributes').titleControlAttribute),
-      $activeContainer = this.elements.$itemContainers.filter(`#${activeTitleControl}`),
-      activeContainerHasFocusableItems = 0 !== this.getFocusableElements($activeContainer).length;
-    if (!isActiveTitle || !activeContainerHasFocusableItems) {
-      this.closeActiveContentElements();
-      return;
-    }
-    this.focusFirstFocusableContainerElement(event, activeTitleControl);
-  }
-  maybeFocusMenuToggle(event, titleIndex) {
-    const isLastTitle = this.isLastTitle(titleIndex);
-    if (!isLastTitle || !this.isDropdownLayout()) {
-      return;
-    }
-    const activeStateAttribute = this.getSettings('ariaAttributes').titleStateAttribute,
-      currentTitle = event.currentTarget,
-      isContainerOpen = 'true' === currentTitle.getAttribute(activeStateAttribute),
-      containerHasFocusableItems = 0 !== this.getFocusableElements(this.elements.$itemContainers.last()).length;
-    if (isContainerOpen && containerHasFocusableItems) {
-      return;
-    }
-    this.setFocusToMenuToggle();
-    event.preventDefault();
-    event.stopPropagation();
-  }
-  setFocusToMenuToggle() {
-    const selectors = this.getSettings('selectors');
-    this.$element.find(selectors.menuToggle).trigger('focus');
-  }
-  isDropdownLayout() {
-    const selectors = this.getSettings('selectors');
-    return 'dropdown' === this.$element.find(selectors.widgetInnerWrapper).attr('data-layout');
-  }
-  closeMenuDropdown() {
     elementorFrontend.elements.$window.trigger('elementor/mega-menu/dropdown-toggle-by-keyboard', {
       widgetId: this.getID(),
       show: false
     });
   }
-  handleTitleHomeOrEndKey(event) {
-    event.preventDefault();
-    const currentTitleIndex = this.getTitleIndex(event.currentTarget) || 1,
-      numberOfTitles = this.elements.$menuItemElements.length,
-      titleIndexUpdated = this.getTitleIndexFocusUpdated(event, currentTitleIndex, numberOfTitles);
-    this.setTitleFocus(titleIndexUpdated);
-    event.stopPropagation();
-  }
-  handleTitleActivationKey(event) {
-    event.preventDefault();
-    if (this.handleTitleLinkEnterOrSpaceEvent(event)) {
-      return;
-    }
-    const titleIndex = this.getTitleIndex(event.currentTarget);
-    elementorFrontend.elements.$window.trigger('elementor/nested-elements/activate-by-keyboard', {
-      widgetId: this.getID(),
-      titleIndex
-    });
-  }
-  setTitleFocus(titleIndexUpdated) {
-    const $newTitle = this.elements.$menuItemElements.filter(this.getTitleFilterSelector(titleIndexUpdated));
-    $newTitle.trigger('focus');
-  }
-  isLastTitle(titleIndex) {
-    return this.elements.$menuItemElements.length === titleIndex;
-  }
-  handleTitleLinkEnterOrSpaceEvent(event) {
-    const isLinkElement = 'a' === event?.currentTarget?.tagName?.toLowerCase();
-    if (!elementorFrontend.isEditMode() && isLinkElement) {
-      event?.currentTarget?.click();
-      event.stopPropagation();
-    }
-    return isLinkElement;
-  }
-  handleTitleEscapeKey(event) {
+  handleTitleEscapeKeyEvents(event) {
     event.preventDefault();
     event.stopPropagation();
-    if (this.isDropdownLayout()) {
+    const selectors = this.getSettings('selectors'),
+      isDropdownLayout = 'dropdown' === this.$element.find(selectors.widgetInnerWrapper).data('layout');
+    if (isDropdownLayout) {
       elementorFrontend.elements.$window.trigger('elementor/mega-menu/dropdown-toggle-by-keyboard', {
         widgetId: this.getID()
       });
-      this.setFocusToMenuToggle();
+      this.$element.find(selectors.menuToggle).trigger('focus');
     }
     elementorFrontend.elements.$window.trigger('elementor/nested-elements/activate-by-keyboard', {
       widgetId: this.getID()
     });
   }
-  handleContentElementKeyboardNavigation(event) {
-    switch (event.key) {
-      case 'Tab':
-        const tabDirection = event.shiftKey ? 'previous' : 'next';
-        this.handleContentElementTabEvents(event, tabDirection);
-        break;
-      case 'Escape':
-        event.preventDefault();
-        event.stopPropagation();
-        this.handleContentElementEscapeEvents(event);
-        break;
-    }
+  handleContentElementEscapeEvents() {
+    this.getActiveTitleElement().trigger('focus');
+    elementorFrontend.elements.$window.trigger('elementor/nested-elements/activate-by-keyboard', {
+      widgetId: this.getID()
+    });
   }
-  handleContentElementTabEvents(event, direction) {
+  handleContentElementTabEvents(event) {
     const $currentElement = jQuery(event.currentTarget),
       containerSelector = this.getSettings('selectors').itemContainer,
-      $currentContainer = $currentElement.closest(containerSelector),
-      $focusableContainerElements = this.getFocusableElements($currentContainer);
-    let $lastFocusableElement;
-    if ('previous' === direction) {
-      $lastFocusableElement = $focusableContainerElements.first();
-    } else {
-      $lastFocusableElement = $focusableContainerElements.last();
-    }
-    const isCurrentElementLastFocusableElement = $currentElement.is($lastFocusableElement);
+      $focusableContainerElements = this.getFocusableElements($currentElement.closest(containerSelector)),
+      $lastFocusableElement = $focusableContainerElements.last(),
+      isCurrentElementLastFocusableElement = $currentElement.is($lastFocusableElement);
     if (!isCurrentElementLastFocusableElement) {
       return;
     }
     event.preventDefault();
     const $activeTitle = this.getActiveTitleElement(),
-      activeTitleIndex = this.getTitleIndex($activeTitle[0]);
-    this.setTitleFocus(activeTitleIndex);
-    event.stopPropagation();
-  }
-  handleContentElementEscapeEvents() {
-    this.getActiveTitleElement().trigger('focus');
-    this.closeActiveContentElements();
-  }
-  focusFirstFocusableContainerElement(event, titleControl) {
-    const currentContainerSelector = `#${titleControl}`,
-      $activeContainer = this.elements.$itemContainers.filter(currentContainerSelector),
-      $firstFocusableContainer = this.getFocusableElements($activeContainer).first();
-    if (0 === $firstFocusableContainer.length) {
-      return;
-    }
-    event.preventDefault();
-    $firstFocusableContainer[0]?.focus();
-    event.stopPropagation();
-  }
-  closeActiveContentElements() {
+      activeTitleIndex = parseInt(this.getTitleIndex($activeTitle[0]));
     elementorFrontend.elements.$window.trigger('elementor/nested-elements/activate-by-keyboard', {
       widgetId: this.getID()
     });
+    this.changeTitleFocus(activeTitleIndex);
   }
 }
 exports["default"] = MenuTitleKeyboardHandler;
@@ -5878,12 +5709,10 @@ class StretchedMenuItemContent extends elementorModules.frontend.handlers.Stretc
   bindEvents() {
     super.bindEvents();
     elementorFrontend.addListenerOnce(this.getUniqueHandlerID(), 'elementor-pro/mega-menu/dropdown-open', this.stretch);
-    elementorFrontend.elements.$window.on('elementor-pro/mega-menu/heading-mouse-event', this.stretch);
   }
   unbindEvents() {
     super.unbindEvents();
     elementorFrontend.removeListeners(this.getUniqueHandlerID(), 'elementor-pro/mega-menu/dropdown-open', this.stretch);
-    elementorFrontend.elements.$window.off('elementor-pro/mega-menu/heading-mouse-event', this.stretch);
   }
   isStretchSettingEnabled() {
     return true;
@@ -6339,12 +6168,12 @@ class _default extends elementorModules.frontend.Document {
     if (!$focusableElements.length) {
       return;
     }
-    let lastButtonClicked = null;
+    let $lastButtonClicked = null;
     if (event?.currentTarget) {
-      lastButtonClicked = event.currentTarget;
+      $lastButtonClicked = jQuery(event.currentTarget);
     }
-    const lastFocusableElement = $focusableElements[$focusableElements.length - 1];
-    const firstFocusableElement = $focusableElements[0];
+    const $lastFocusableElement = $focusableElements[$focusableElements.length - 1];
+    const $firstFocusableElement = $focusableElements[0];
     const onKeyDownPressed = keyDownEvent => {
       const TAB_KEY = 9;
       const isShiftPressed = keyDownEvent.shiftKey;
@@ -6354,25 +6183,25 @@ class _default extends elementorModules.frontend.Document {
       }
       const activeElement = elementorFrontend.elements.window.document.activeElement;
       if (isShiftPressed) {
-        const isFocusOnFirstElement = activeElement === firstFocusableElement;
+        const isFocusOnFirstElement = activeElement === $firstFocusableElement;
         if (isFocusOnFirstElement) {
-          lastFocusableElement.focus();
+          $lastFocusableElement.focus();
           keyDownEvent.preventDefault();
         }
       } else {
-        const isFocusOnLastElement = activeElement === lastFocusableElement;
+        const isFocusOnLastElement = activeElement === $lastFocusableElement;
         if (isFocusOnLastElement) {
-          firstFocusableElement.focus();
+          $firstFocusableElement.focus();
           keyDownEvent.preventDefault();
         }
       }
     };
-    firstFocusableElement.focus();
+    $firstFocusableElement.focus();
     const $window = elementorFrontend.elements.$window;
     $window.on('keydown', onKeyDownPressed).on('elementor/popup/hide', () => {
       $window.off('keydown', onKeyDownPressed);
-      if (lastButtonClicked) {
-        lastButtonClicked.focus();
+      if ($lastButtonClicked) {
+        $lastButtonClicked.focus();
       }
     });
   }
@@ -7746,7 +7575,9 @@ class LoadMore extends elementorModules.frontend.handlers.Base {
   handleUiWhenNoPosts() {
     this.elements.postsWidgetWrapper.classList.add(this.classes.loadMorePaginationEnd);
   }
-  afterInsertPosts() {}
+
+  // eslint-disable-next-line no-unused-vars
+  afterInsertPosts(postsElements) {}
   handleSuccessFetch(result) {
     this.handleUiAfterLoading();
     const selectors = this.getSettings('selectors');
@@ -8850,7 +8681,6 @@ class TOCHandler extends elementorModules.frontend.handlers.Base {
         if ('bullets' === elementSettings.marker_view && icon) {
           liContent = `${renderedIcon}${liContent}`;
         }
-        liContent = _dompurify.default.sanitize(liContent);
         html += liContent;
         html += '</div>';
         this.listItemPointer++;
@@ -10170,7 +10000,7 @@ class _default extends elementorModules.frontend.handlers.Base {
   getDefaultSettings() {
     return {
       selectors: {
-        woocommerceNotices: ':not(.woocommerce-NoticeGroup) .wc-block-components-notice-banner, .woocommerce-NoticeGroup, :not(.woocommerce-NoticeGroup) .woocommerce-error, :not(.woocommerce-NoticeGroup) .woocommerce-message, :not(.woocommerce-NoticeGroup) .woocommerce-info',
+        woocommerceNotices: '.woocommerce-NoticeGroup, :not(.woocommerce-NoticeGroup) .woocommerce-error, :not(.woocommerce-NoticeGroup) .woocommerce-message, :not(.woocommerce-NoticeGroup) .woocommerce-info',
         noticesWrapper: '.e-woocommerce-notices-wrapper'
       }
     };

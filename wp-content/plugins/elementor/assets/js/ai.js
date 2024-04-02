@@ -1,4 +1,4 @@
-/*! elementor - v3.20.0 - 26-03-2024 */
+/*! elementor - v3.18.0 - 08-12-2023 */
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
@@ -153,7 +153,6 @@ var _possibleConstructorReturn2 = _interopRequireDefault(__webpack_require__(/*!
 var _getPrototypeOf2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/getPrototypeOf */ "../node_modules/@babel/runtime/helpers/getPrototypeOf.js"));
 var _app = _interopRequireDefault(__webpack_require__(/*! ./app */ "../modules/ai/assets/js/editor/app.js"));
 var _i18n = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
-var _aiPromotionInfotipWrapper = _interopRequireDefault(__webpack_require__(/*! ./components/ai-promotion-infotip-wrapper */ "../modules/ai/assets/js/editor/components/ai-promotion-infotip-wrapper.js"));
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2.default)(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2.default)(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2.default)(this, result); }; }
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 var AiBehavior = /*#__PURE__*/function (_Marionette$Behavior) {
@@ -225,29 +224,6 @@ var AiBehavior = /*#__PURE__*/function (_Marionette$Behavior) {
       return isDefaultValue ? this.getOption('buttonLabel') : this.getOption('editButtonLabel');
     }
   }, {
-    key: "getPromotionTexts",
-    value: function getPromotionTexts(controlType) {
-      switch (controlType) {
-        case 'textarea':
-          return {
-            header: (0, _i18n.__)("Writer's block? Never again!", 'elementor'),
-            contentText: (0, _i18n.__)('Elementor AI can draft your initial content and help you beat the blank page.', 'elementor')
-          };
-        case 'media':
-          return {
-            header: (0, _i18n.__)('Unleash your creativity.', 'elementor'),
-            contentText: (0, _i18n.__)('With Elementor AI, you can generate any image you would like for your website.', 'elementor')
-          };
-        case 'code':
-          return {
-            header: (0, _i18n.__)('Let the elves take care of it.', 'elementor'),
-            contentText: (0, _i18n.__)('Elementor AI can help you write code faster and more efficiently.', 'elementor')
-          };
-        default:
-          return null;
-      }
-    }
-  }, {
     key: "onRender",
     value: function onRender() {
       var isPromotion = !this.config.is_get_started;
@@ -274,38 +250,6 @@ var AiBehavior = /*#__PURE__*/function (_Marionette$Behavior) {
         $wrap = this.$el.find('.elementor-control-title');
       }
       $wrap.after($button);
-      var controlType = this.view.model.get('type');
-      var promotionTexts = this.getPromotionTexts(controlType);
-      if (!promotionTexts) {
-        return;
-      }
-      var editorSessionValue = sessionStorage.getItem('ai_promotion_introduction_editor_session_key');
-      if (!editorSessionValue || editorSessionValue !== EDITOR_SESSION_ID) {
-        sessionStorage.setItem('ai_promotion_introduction_editor_session_key', EDITOR_SESSION_ID);
-      } else {
-        return;
-      }
-      setTimeout(function () {
-        var _elementor2, _elementor2$getPrefer;
-        var rootBox = $button[0].getBoundingClientRect();
-        if (!rootBox || 0 === rootBox.width || 0 === rootBox.height) {
-          return;
-        }
-        var rootElement = document.createElement('div');
-        document.body.append(rootElement);
-        var _ReactUtils$render = ReactUtils.render( /*#__PURE__*/_react.default.createElement(_aiPromotionInfotipWrapper.default, {
-            anchor: $button[0],
-            header: promotionTexts.header,
-            contentText: promotionTexts.contentText,
-            controlType: controlType,
-            unmountAction: function unmountAction() {
-              unmount();
-            },
-            colorScheme: ((_elementor2 = elementor) === null || _elementor2 === void 0 ? void 0 : (_elementor2$getPrefer = _elementor2.getPreferences) === null || _elementor2$getPrefer === void 0 ? void 0 : _elementor2$getPrefer.call(_elementor2, 'ui_theme')) || 'auto',
-            isRTL: elementorCommon.config.isRTL
-          }), rootElement),
-          unmount = _ReactUtils$render.unmount;
-      }, 1000);
     }
   }]);
   return AiBehavior;
@@ -357,27 +301,31 @@ var getRemoteConfig = function getRemoteConfig() {
   return request('ai_get_remote_config');
 };
 exports.getRemoteConfig = getRemoteConfig;
-var getCompletionText = function getCompletionText(payload) {
+var getCompletionText = function getCompletionText(prompt) {
   return request('ai_get_completion_text', {
-    payload: payload
+    prompt: prompt
   });
 };
 exports.getCompletionText = getCompletionText;
-var getEditText = function getEditText(payload) {
+var getEditText = function getEditText(input, instruction) {
   return request('ai_get_edit_text', {
-    payload: payload
+    input: input,
+    instruction: instruction
   });
 };
 exports.getEditText = getEditText;
-var getCustomCode = function getCustomCode(payload) {
+var getCustomCode = function getCustomCode(prompt, language) {
   return request('ai_get_custom_code', {
-    payload: payload
+    prompt: prompt,
+    language: language
   });
 };
 exports.getCustomCode = getCustomCode;
-var getCustomCSS = function getCustomCSS(payload) {
+var getCustomCSS = function getCustomCSS(prompt, htmlMarkup, elementId) {
   return request('ai_get_custom_css', {
-    payload: payload
+    prompt: prompt,
+    html_markup: htmlMarkup,
+    element_id: elementId
   });
 };
 exports.getCustomCSS = getCustomCSS;
@@ -391,45 +339,56 @@ var setStatusFeedback = function setStatusFeedback(responseId) {
   });
 };
 exports.setStatusFeedback = setStatusFeedback;
-var getTextToImageGeneration = function getTextToImageGeneration(payload) {
+var getTextToImageGeneration = function getTextToImageGeneration(prompt, promptSettings) {
   return request('ai_get_text_to_image', {
-    payload: payload
+    prompt: prompt,
+    promptSettings: promptSettings
   });
 };
 exports.getTextToImageGeneration = getTextToImageGeneration;
-var getImageToImageGeneration = function getImageToImageGeneration(payload) {
+var getImageToImageGeneration = function getImageToImageGeneration(prompt, promptSettings, image) {
   return request('ai_get_image_to_image', {
-    payload: payload
+    prompt: prompt,
+    promptSettings: promptSettings,
+    image: image
   });
 };
 exports.getImageToImageGeneration = getImageToImageGeneration;
-var getImageToImageMaskGeneration = function getImageToImageMaskGeneration(payload) {
+var getImageToImageMaskGeneration = function getImageToImageMaskGeneration(prompt, promptSettings, image, mask) {
   return request('ai_get_image_to_image_mask', {
-    payload: payload
+    prompt: prompt,
+    promptSettings: promptSettings,
+    image: image,
+    mask: mask
   });
 };
 exports.getImageToImageMaskGeneration = getImageToImageMaskGeneration;
-var getImageToImageOutPainting = function getImageToImageOutPainting(payload) {
+var getImageToImageOutPainting = function getImageToImageOutPainting(prompt, promptSettings, image, mask) {
   return request('ai_get_image_to_image_outpainting', {
-    payload: payload
+    prompt: prompt,
+    promptSettings: promptSettings,
+    mask: mask
   });
 };
 exports.getImageToImageOutPainting = getImageToImageOutPainting;
-var getImageToImageUpscale = function getImageToImageUpscale(payload) {
+var getImageToImageUpscale = function getImageToImageUpscale(prompt, promptSettings, image) {
   return request('ai_get_image_to_image_upscale', {
-    payload: payload
+    prompt: prompt,
+    promptSettings: promptSettings,
+    image: image
   });
 };
 exports.getImageToImageUpscale = getImageToImageUpscale;
-var getImageToImageRemoveBackground = function getImageToImageRemoveBackground(payload) {
+var getImageToImageRemoveBackground = function getImageToImageRemoveBackground(image) {
   return request('ai_get_image_to_image_remove_background', {
-    payload: payload
+    image: image
   });
 };
 exports.getImageToImageRemoveBackground = getImageToImageRemoveBackground;
-var getImageToImageReplaceBackground = function getImageToImageReplaceBackground(payload) {
+var getImageToImageReplaceBackground = function getImageToImageReplaceBackground(prompt, image) {
   return request('ai_get_image_to_image_replace_background', {
-    payload: payload
+    prompt: prompt,
+    image: image
   });
 };
 exports.getImageToImageReplaceBackground = getImageToImageReplaceBackground;
@@ -516,13 +475,12 @@ var _ui = __webpack_require__(/*! @elementor/ui */ "@elementor/ui");
 var _propTypes = _interopRequireDefault(__webpack_require__(/*! prop-types */ "../node_modules/prop-types/index.js"));
 var _pageContent = _interopRequireDefault(__webpack_require__(/*! ./page-content */ "../modules/ai/assets/js/editor/page-content.js"));
 var _helpers = __webpack_require__(/*! ./helpers */ "../modules/ai/assets/js/editor/helpers/index.js");
-var _requestsIds = __webpack_require__(/*! ./context/requests-ids */ "../modules/ai/assets/js/editor/context/requests-ids.js");
 var App = function App(props) {
   return /*#__PURE__*/_react.default.createElement(_ui.DirectionProvider, {
     rtl: props.isRTL
   }, /*#__PURE__*/_react.default.createElement(_ui.ThemeProvider, {
     colorScheme: props.colorScheme
-  }, /*#__PURE__*/_react.default.createElement(_requestsIds.RequestIdsProvider, null, /*#__PURE__*/_react.default.createElement(_pageContent.default, {
+  }, /*#__PURE__*/_react.default.createElement(_pageContent.default, {
     type: props.type,
     controlType: props.controlType,
     onClose: props.onClose,
@@ -531,7 +489,7 @@ var App = function App(props) {
     setControlValue: props.setControlValue,
     controlView: props.controlView,
     additionalOptions: props.additionalOptions
-  }))));
+  })));
 };
 App.propTypes = {
   colorScheme: _propTypes.default.oneOf(['auto', 'light', 'dark']),
@@ -546,256 +504,6 @@ App.propTypes = {
 };
 var _default = App;
 exports["default"] = _default;
-
-/***/ }),
-
-/***/ "../modules/ai/assets/js/editor/components/ai-promotion-infotip-content.js":
-/*!*********************************************************************************!*\
-  !*** ../modules/ai/assets/js/editor/components/ai-promotion-infotip-content.js ***!
-  \*********************************************************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-"use strict";
-/* provided dependency */ var PropTypes = __webpack_require__(/*! prop-types */ "../node_modules/prop-types/index.js");
-
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-var _react = _interopRequireDefault(__webpack_require__(/*! react */ "react"));
-var _ui = __webpack_require__(/*! @elementor/ui */ "@elementor/ui");
-var _i18n = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
-var AiPromotionInfotipContent = function AiPromotionInfotipContent(props) {
-  return /*#__PURE__*/_react.default.createElement(_ui.Card, {
-    sx: {
-      width: 300
-    },
-    elevation: 0
-  }, /*#__PURE__*/_react.default.createElement(_ui.CardHeader, {
-    subheader: "ELEMENTOR AI"
-  }), /*#__PURE__*/_react.default.createElement(_ui.CardContent, null, /*#__PURE__*/_react.default.createElement(_ui.Typography, {
-    variant: "subtitle2",
-    color: "text.secondary"
-  }, props.header), /*#__PURE__*/_react.default.createElement(_ui.Typography, {
-    color: "text.secondary"
-  }, props.contentText)), /*#__PURE__*/_react.default.createElement(_ui.CardActions, {
-    disableSpacing: true,
-    sx: {
-      justifyContent: 'flex-end',
-      gap: 1
-    }
-  }, /*#__PURE__*/_react.default.createElement(_ui.Button, {
-    onClick: function onClick() {
-      return props.onClose();
-    },
-    color: "secondary"
-  }, (0, _i18n.__)('Not Now', 'elementor')), /*#__PURE__*/_react.default.createElement(_ui.Button, {
-    onClick: function onClick() {
-      return props.onClick();
-    },
-    variant: "contained"
-  }, (0, _i18n.__)('Try it now', 'elementor'))));
-};
-AiPromotionInfotipContent.propTypes = {
-  header: PropTypes.string,
-  contentText: PropTypes.string,
-  onClick: PropTypes.func,
-  onClose: PropTypes.func
-};
-var _default = AiPromotionInfotipContent;
-exports["default"] = _default;
-
-/***/ }),
-
-/***/ "../modules/ai/assets/js/editor/components/ai-promotion-infotip-wrapper.js":
-/*!*********************************************************************************!*\
-  !*** ../modules/ai/assets/js/editor/components/ai-promotion-infotip-wrapper.js ***!
-  \*********************************************************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-"use strict";
-/* provided dependency */ var PropTypes = __webpack_require__(/*! prop-types */ "../node_modules/prop-types/index.js");
-
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-var _react = _interopRequireDefault(__webpack_require__(/*! react */ "react"));
-var _aiPromotionInfotip = _interopRequireDefault(__webpack_require__(/*! ./ai-promotion-infotip */ "../modules/ai/assets/js/editor/components/ai-promotion-infotip.js"));
-var _aiPromotionInfotipContent = _interopRequireDefault(__webpack_require__(/*! ./ai-promotion-infotip-content */ "../modules/ai/assets/js/editor/components/ai-promotion-infotip-content.js"));
-var _ui = __webpack_require__(/*! @elementor/ui */ "@elementor/ui");
-var _useIntroduction2 = _interopRequireDefault(__webpack_require__(/*! ../hooks/use-introduction */ "../modules/ai/assets/js/editor/hooks/use-introduction.js"));
-var _focusOutListener = __webpack_require__(/*! ../helpers/focus-out-listener */ "../modules/ai/assets/js/editor/helpers/focus-out-listener.js");
-var AiPromotionInfotipWrapper = function AiPromotionInfotipWrapper(_ref) {
-  var anchor = _ref.anchor,
-    header = _ref.header,
-    contentText = _ref.contentText,
-    controlType = _ref.controlType,
-    unmountAction = _ref.unmountAction,
-    colorScheme = _ref.colorScheme,
-    isRTL = _ref.isRTL;
-  var focusOutListener = (0, _focusOutListener.useFocusOutListener)();
-  var _useIntroduction = (0, _useIntroduction2.default)("ai_promotion_introduction_".concat(controlType)),
-    isViewed = _useIntroduction.isViewed,
-    markAsViewed = _useIntroduction.markAsViewed;
-  if (isViewed) {
-    return;
-  }
-  return /*#__PURE__*/_react.default.createElement(_ui.DirectionProvider, {
-    rtl: isRTL
-  }, /*#__PURE__*/_react.default.createElement(_ui.ThemeProvider, {
-    colorScheme: colorScheme
-  }, /*#__PURE__*/_react.default.createElement(_focusOutListener.FocusOutListener, {
-    listener: focusOutListener,
-    onFocusOut: function onFocusOut() {
-      return unmountAction();
-    }
-  }, /*#__PURE__*/_react.default.createElement(_aiPromotionInfotip.default, {
-    anchor: anchor,
-    focusOutListener: focusOutListener,
-    content: /*#__PURE__*/_react.default.createElement(_aiPromotionInfotipContent.default, {
-      focusOutListener: focusOutListener,
-      header: header,
-      contentText: contentText,
-      onClose: function onClose() {
-        markAsViewed();
-        focusOutListener.remove();
-        unmountAction();
-      },
-      onClick: function onClick() {
-        markAsViewed();
-        focusOutListener.remove();
-        unmountAction();
-        anchor.click();
-      }
-    })
-  }))));
-};
-AiPromotionInfotipWrapper.propTypes = {
-  anchor: PropTypes.object,
-  header: PropTypes.string,
-  contentText: PropTypes.string,
-  controlType: PropTypes.string,
-  unmountAction: PropTypes.func,
-  colorScheme: PropTypes.string,
-  isRTL: PropTypes.bool
-};
-var _default = AiPromotionInfotipWrapper;
-exports["default"] = _default;
-
-/***/ }),
-
-/***/ "../modules/ai/assets/js/editor/components/ai-promotion-infotip.js":
-/*!*************************************************************************!*\
-  !*** ../modules/ai/assets/js/editor/components/ai-promotion-infotip.js ***!
-  \*************************************************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-"use strict";
-/* provided dependency */ var PropTypes = __webpack_require__(/*! prop-types */ "../node_modules/prop-types/index.js");
-
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = AiPromotionInfotip;
-var _react = _interopRequireDefault(__webpack_require__(/*! react */ "react"));
-var _ui = __webpack_require__(/*! @elementor/ui */ "@elementor/ui");
-var StyledPopper = (0, _ui.styled)(_ui.Popper)(function (_ref) {
-  var theme = _ref.theme;
-  return {
-    '& .MuiTooltip-tooltip': {
-      width: 500,
-      minHeight: 50,
-      padding: 0,
-      backgroundColor: theme.palette.background.paper,
-      color: theme.palette.text.primary,
-      // The shadow angle should guarantee that the arrow is visible clearly.
-      boxShadow: '0px -6px 10px 2px rgba(0,0,0,0.025),6px 0px 10px 2px rgba(0,0,0,0.025),-6px 0px 10px 2px rgba(0,0,0,0.025),0px 6px 10px 2px rgba(0,0,0,0.025)'
-    },
-    '& .MuiTooltip-arrow': {
-      color: theme.palette.background.paper,
-      // Arrow size.
-      fontSize: '1.2rem'
-    },
-    '&.MuiTooltip-popper .MuiTooltip-tooltip.MuiTooltip-tooltipPlacementBottom': {
-      marginTop: theme.spacing(2)
-    },
-    '&.MuiTooltip-popper .MuiTooltip-tooltip.MuiTooltip-tooltipPlacementRight': {
-      marginLeft: theme.spacing(2)
-    },
-    '&.MuiTooltip-popper .MuiTooltip-tooltip.MuiTooltip-tooltipPlacementLeft': {
-      marginRight: theme.spacing(2)
-    },
-    '&.MuiTooltip-popper .MuiTooltip-tooltip.MuiTooltip-tooltipPlacementTop': {
-      marginBottom: theme.spacing(2)
-    }
-  };
-});
-function AiPromotionInfotip(_ref2) {
-  var anchor = _ref2.anchor,
-    content = _ref2.content,
-    focusOutListener = _ref2.focusOutListener;
-  var positionRef = _react.default.useRef({
-    x: 0,
-    y: 0,
-    width: 0,
-    height: 0
-  });
-  var popperRef = _react.default.useRef(null);
-  var showTooltip = function showTooltip() {
-    var _anchor$getBoundingCl = anchor.getBoundingClientRect(),
-      x = _anchor$getBoundingCl.x,
-      y = _anchor$getBoundingCl.y,
-      width = _anchor$getBoundingCl.width,
-      height = _anchor$getBoundingCl.height;
-    positionRef.current = {
-      x: x,
-      y: y,
-      width: width,
-      height: height
-    };
-    if (null === popperRef.current) {
-      return;
-    }
-    popperRef.current.update();
-  };
-  _react.default.useEffect(function () {
-    showTooltip();
-  }, []);
-  return /*#__PURE__*/_react.default.createElement(_ui.Tooltip, {
-    arrow: true,
-    open: true,
-    title: content,
-    placement: "right",
-    PopperComponent: StyledPopper,
-    PopperProps: {
-      onClick: function onClick() {
-        return focusOutListener.reset();
-      },
-      popperRef: popperRef,
-      anchorEl: {
-        getBoundingClientRect: function getBoundingClientRect() {
-          return new DOMRect(positionRef.current.x, positionRef.current.y, positionRef.current.width, positionRef.current.height);
-        }
-      }
-    }
-  }, /*#__PURE__*/_react.default.createElement("div", {
-    style: {
-      display: 'none'
-    }
-  }));
-}
-AiPromotionInfotip.propTypes = {
-  anchor: PropTypes.element.isRequired,
-  content: PropTypes.object.isRequired,
-  focusOutListener: PropTypes.object.isRequired
-};
 
 /***/ }),
 
@@ -1205,7 +913,6 @@ exports["default"] = _default;
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
-/* provided dependency */ var sprintf = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n")["sprintf"];
 
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
@@ -1227,85 +934,65 @@ var PromptErrorMessage = function PromptErrorMessage(_ref) {
     _ref$actionPosition = _ref.actionPosition,
     actionPosition = _ref$actionPosition === void 0 ? 'default' : _ref$actionPosition,
     props = (0, _objectWithoutProperties2.default)(_ref, _excluded);
-  function getQuotaReachedTrailMessage(featureName) {
-    if (!featureName) {
-      return {
-        text: /*#__PURE__*/_react.default.createElement(_ui.AlertTitle, null, (0, _i18n.__)('It\'s time to upgrade.', 'elementor')),
-        description: (0, _i18n.__)('Enjoy the free trial? Upgrade now for unlimited access to built-in image, text and custom code generators.', 'elementor'),
-        buttonText: (0, _i18n.__)('Upgrade', 'elementor'),
-        buttonAction: function buttonAction() {
-          return window.open('https://go.elementor.com/ai-popup-purchase-limit-reached/', '_blank');
-        }
-      };
-    }
-    return {
-      // Translators: %s is the feature name.
-      text: /*#__PURE__*/_react.default.createElement(_ui.AlertTitle, null, sprintf((0, _i18n.__)('You\'ve used all AI credits for %s.', 'elementor'), featureName.toLowerCase())),
-      description: (0, _i18n.__)('Upgrade now to keep using this feature. You still have credits for other AI features (Text, Code, Images, Containers, etc.)', 'elementor'),
-      buttonText: (0, _i18n.__)('Upgrade now', 'elementor'),
+  var messages = {
+    default: {
+      text: /*#__PURE__*/_react.default.createElement(_ui.AlertTitle, null, (0, _i18n.__)('Unknown error. Please try again later.', 'elementor')),
+      description: (0, _i18n.__)('Error code:', 'elementor') + ' ' + error,
+      buttonText: (0, _i18n.__)('Try Again', 'elementor'),
+      buttonAction: onRetry
+    },
+    service_outage_internal: {
+      text: /*#__PURE__*/_react.default.createElement(_ui.AlertTitle, null, (0, _i18n.__)('Elementor AI is temporarily unavailable', 'elementor')),
+      description: (0, _i18n.__)('Seems like we are experiencing technical difficulty. We should be up and running shortly.', 'elementor'),
+      buttonText: (0, _i18n.__)('Try Again', 'elementor'),
+      buttonAction: onRetry
+    },
+    invalid_connect_data: {
+      text: /*#__PURE__*/_react.default.createElement(_ui.AlertTitle, null, (0, _i18n.__)('Reconnect your account', 'elementor')),
+      description: /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, (0, _i18n.__)('We couldn\'t connect to your account due to technical difficulties on our end. Reconnect your account to continue.', 'elementor'), ' ', /*#__PURE__*/_react.default.createElement("a", {
+        href: "https://elementor.com/help/disconnecting-reconnecting-your-elementor-account/",
+        target: "_blank",
+        rel: "noreferrer"
+      }, (0, _i18n.__)('Show me how', 'elementor'))),
+      buttonText: (0, _i18n.__)('Reconnect', 'elementor'),
+      buttonAction: function buttonAction() {
+        return window.open(window.ElementorAiConfig.connect_url);
+      }
+    },
+    not_connected: {
+      text: /*#__PURE__*/_react.default.createElement(_ui.AlertTitle, null, (0, _i18n.__)('You aren\'t connected to Elementor AI.', 'elementor')),
+      description: (0, _i18n.__)('Elementor AI is just a few clicks away. Connect your account to instantly create texts and custom code.', 'elementor'),
+      buttonText: (0, _i18n.__)('Connect', 'elementor'),
+      buttonAction: function buttonAction() {
+        return window.open(window.ElementorAiConfig.connect_url);
+      }
+    },
+    quota_reached_trail: {
+      text: /*#__PURE__*/_react.default.createElement(_ui.AlertTitle, null, (0, _i18n.__)('It\'s time to upgrade.', 'elementor')),
+      description: (0, _i18n.__)('Enjoy the free trial? Upgrade now for unlimited access to built-in image, text and custom code generators.', 'elementor'),
+      buttonText: (0, _i18n.__)('Upgrade', 'elementor'),
       buttonAction: function buttonAction() {
         return window.open('https://go.elementor.com/ai-popup-purchase-limit-reached/', '_blank');
       }
-    };
-  }
-  function getErrorMessage() {
-    var _error$extra_data;
-    var errMsg = error.message || error;
-    var featureName = (_error$extra_data = error.extra_data) === null || _error$extra_data === void 0 ? void 0 : _error$extra_data.featureName;
-    var messages = {
-      default: {
-        text: /*#__PURE__*/_react.default.createElement(_ui.AlertTitle, null, (0, _i18n.__)('Unknown error. Please try again later.', 'elementor')),
-        description: (0, _i18n.__)('Error code:', 'elementor') + ' ' + error,
-        buttonText: (0, _i18n.__)('Try Again', 'elementor'),
-        buttonAction: onRetry
-      },
-      service_outage_internal: {
-        text: /*#__PURE__*/_react.default.createElement(_ui.AlertTitle, null, (0, _i18n.__)('Elementor AI is temporarily unavailable', 'elementor')),
-        description: (0, _i18n.__)('Seems like we are experiencing technical difficulty. We should be up and running shortly.', 'elementor'),
-        buttonText: (0, _i18n.__)('Try Again', 'elementor'),
-        buttonAction: onRetry
-      },
-      invalid_connect_data: {
-        text: /*#__PURE__*/_react.default.createElement(_ui.AlertTitle, null, (0, _i18n.__)('Reconnect your account', 'elementor')),
-        description: /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, (0, _i18n.__)('We couldn\'t connect to your account due to technical difficulties on our end. Reconnect your account to continue.', 'elementor'), ' ', /*#__PURE__*/_react.default.createElement("a", {
-          href: "https://elementor.com/help/disconnecting-reconnecting-your-elementor-account/",
-          target: "_blank",
-          rel: "noreferrer"
-        }, (0, _i18n.__)('Show me how', 'elementor'))),
-        buttonText: (0, _i18n.__)('Reconnect', 'elementor'),
-        buttonAction: function buttonAction() {
-          return window.open(window.ElementorAiConfig.connect_url);
-        }
-      },
-      not_connected: {
-        text: /*#__PURE__*/_react.default.createElement(_ui.AlertTitle, null, (0, _i18n.__)('You aren\'t connected to Elementor AI.', 'elementor')),
-        description: (0, _i18n.__)('Elementor AI is just a few clicks away. Connect your account to instantly create texts and custom code.', 'elementor'),
-        buttonText: (0, _i18n.__)('Connect', 'elementor'),
-        buttonAction: function buttonAction() {
-          return window.open(window.ElementorAiConfig.connect_url);
-        }
-      },
-      quota_reached_trail: getQuotaReachedTrailMessage(featureName),
-      quota_reached_subscription: {
-        text: /*#__PURE__*/_react.default.createElement(_ui.AlertTitle, null, (0, _i18n.__)('It\'s time to upgrade.', 'elementor')),
-        description: (0, _i18n.__)('Love Elementor AI? Upgrade to continue creating with built-in image, text and custom code generators.', 'elementor'),
-        buttonText: (0, _i18n.__)('Upgrade', 'elementor'),
-        buttonAction: function buttonAction() {
-          return window.open('https://go.elementor.com/ai-popup-purchase-limit-reached/', '_blank');
-        }
-      },
-      rate_limit_network: {
-        text: /*#__PURE__*/_react.default.createElement(_ui.AlertTitle, null, (0, _i18n.__)('Whoa! Slow down there.', 'elementor')),
-        description: (0, _i18n.__)('We can’t process that many requests so fast. Try again in 15 minutes.', 'elementor')
-      },
-      invalid_prompts: {
-        text: /*#__PURE__*/_react.default.createElement(_ui.AlertTitle, null, (0, _i18n.__)('We were unable to generate that prompt.', 'elementor')),
-        description: (0, _i18n.__)('Seems like the prompt contains words that could generate harmful content. Write a different prompt to continue.', 'elementor')
+    },
+    quota_reached_subscription: {
+      text: /*#__PURE__*/_react.default.createElement(_ui.AlertTitle, null, (0, _i18n.__)('It\'s time to upgrade.', 'elementor')),
+      description: (0, _i18n.__)('Love Elementor AI? Upgrade to continue creating with built-in image, text and custom code generators.', 'elementor'),
+      buttonText: (0, _i18n.__)('Upgrade', 'elementor'),
+      buttonAction: function buttonAction() {
+        return window.open('https://go.elementor.com/ai-popup-purchase-limit-reached/', '_blank');
       }
-    };
-    return messages[errMsg] || messages.default;
-  }
-  var message = getErrorMessage();
+    },
+    rate_limit_network: {
+      text: /*#__PURE__*/_react.default.createElement(_ui.AlertTitle, null, (0, _i18n.__)('Whoa! Slow down there.', 'elementor')),
+      description: (0, _i18n.__)('We can’t process that many requests so fast. Try again in 15 minutes.', 'elementor')
+    },
+    invalid_prompts: {
+      text: /*#__PURE__*/_react.default.createElement(_ui.AlertTitle, null, (0, _i18n.__)('We were unable to generate that prompt.', 'elementor')),
+      description: (0, _i18n.__)('Seems like the prompt contains words that could generate harmful content. Write a different prompt to continue.', 'elementor')
+    }
+  };
+  var message = messages[error] || messages.default;
   var action = (message === null || message === void 0 ? void 0 : message.buttonText) && /*#__PURE__*/_react.default.createElement(_ui.Button, {
     color: "inherit",
     size: "small",
@@ -2690,7 +2377,7 @@ var PromptHistoryUpgrade = function PromptHistoryUpgrade(_ref) {
     }
   }, getMessage(variant, historyType)), /*#__PURE__*/_react.default.createElement(_ui.Button, {
     variant: "contained",
-    color: "promotion",
+    color: "accent",
     size: "small",
     href: actionUrl,
     target: "_blank",
@@ -2700,7 +2387,7 @@ var PromptHistoryUpgrade = function PromptHistoryUpgrade(_ref) {
       width: '50%',
       alignSelf: 'center',
       '&:hover': {
-        color: 'promotion.contrastText'
+        color: 'accent.contrastText'
       }
     }
   }, (0, _i18n.__)('Upgrade now', 'elementor')));
@@ -2710,42 +2397,6 @@ PromptHistoryUpgrade.propTypes = {
   historyType: _propTypes.default.oneOf(Object.values(_historyTypes.HISTORY_TYPES)).isRequired
 };
 var _default = PromptHistoryUpgrade;
-exports["default"] = _default;
-
-/***/ }),
-
-/***/ "../modules/ai/assets/js/editor/components/prompt-library-link.js":
-/*!************************************************************************!*\
-  !*** ../modules/ai/assets/js/editor/components/prompt-library-link.js ***!
-  \************************************************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-"use strict";
-
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-var _react = _interopRequireDefault(__webpack_require__(/*! react */ "react"));
-var _ui = __webpack_require__(/*! @elementor/ui */ "@elementor/ui");
-var _i18n = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
-var _propTypes = _interopRequireDefault(__webpack_require__(/*! prop-types */ "../node_modules/prop-types/index.js"));
-var PromptLibraryLink = function PromptLibraryLink(props) {
-  return /*#__PURE__*/_react.default.createElement(_ui.Typography, {
-    variant: "body2",
-    color: "text.secondary"
-  }, (0, _i18n.__)('For more suggestions, explore our'), ' ', /*#__PURE__*/_react.default.createElement(_ui.Link, {
-    href: props.libraryLink,
-    className: "elementor-clickable",
-    target: "_blank"
-  }, (0, _i18n.__)('prompt library')));
-};
-PromptLibraryLink.propTypes = {
-  libraryLink: _propTypes.default.string
-};
-var _default = PromptLibraryLink;
 exports["default"] = _default;
 
 /***/ }),
@@ -2826,13 +2477,12 @@ var PromptSuggestions = function PromptSuggestions(props) {
         return props.onSelect(option);
       }
     });
-  })), props.children);
+  })));
 };
 PromptSuggestions.propTypes = {
   suggestions: _propTypes.default.arrayOf(_propTypes.default.string),
   onSelect: _propTypes.default.func.isRequired,
-  suggestionFilter: _propTypes.default.func,
-  children: _propTypes.default.node
+  suggestionFilter: _propTypes.default.func
 };
 var _default = PromptSuggestions;
 exports["default"] = _default;
@@ -3174,23 +2824,51 @@ Object.defineProperty(exports, "__esModule", ({
 exports["default"] = void 0;
 var _react = _interopRequireDefault(__webpack_require__(/*! react */ "react"));
 var _extends2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/extends */ "../node_modules/@babel/runtime/helpers/extends.js"));
+var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ "../node_modules/@babel/runtime/helpers/defineProperty.js"));
 var _objectWithoutProperties2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/objectWithoutProperties */ "../node_modules/@babel/runtime/helpers/objectWithoutProperties.js"));
 var _ui = __webpack_require__(/*! @elementor/ui */ "@elementor/ui");
-var _excluded = ["onClose"];
-var UpgradeBanner = function UpgradeBanner(_ref) {
-  var onClose = _ref.onClose,
-    props = (0, _objectWithoutProperties2.default)(_ref, _excluded);
+var _icons = __webpack_require__(/*! @elementor/icons */ "@elementor/icons");
+var _excluded = ["onClose", "sx"];
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+var BannerActions = function BannerActions(_ref) {
+  var onClose = _ref.onClose;
+  return /*#__PURE__*/_react.default.createElement(_ui.Stack, {
+    direction: "row",
+    alignItems: "center",
+    gap: 1
+  }, /*#__PURE__*/_react.default.createElement(_ui.Button, {
+    size: "small",
+    color: "inherit",
+    variant: "outlined",
+    onClick: function onClick() {
+      return window.open('https://go.elementor.com/ai-banner-free-upgrade/', '_blank');
+    }
+  }, __('Upgrade', 'elementor')), /*#__PURE__*/_react.default.createElement(_ui.IconButton, {
+    color: "inherit",
+    size: "small",
+    onClick: onClose
+  }, /*#__PURE__*/_react.default.createElement(_icons.XIcon, null)));
+};
+BannerActions.propTypes = {
+  onClose: PropTypes.func
+};
+var UpgradeBanner = function UpgradeBanner(_ref2) {
+  var onClose = _ref2.onClose,
+    _ref2$sx = _ref2.sx,
+    sx = _ref2$sx === void 0 ? {} : _ref2$sx,
+    props = (0, _objectWithoutProperties2.default)(_ref2, _excluded);
   return /*#__PURE__*/_react.default.createElement(_ui.Alert, (0, _extends2.default)({
     icon: false,
-    action: /*#__PURE__*/_react.default.createElement(_ui.AlertAction, {
-      onClick: function onClick() {
-        return window.open('https://go.elementor.com/ai-banner-free-upgrade/', '_blank');
-      }
-    }, __('Upgrade', 'elementor')),
-    variant: "filled",
-    color: "promotion",
-    onClose: onClose
-  }, props), __('You’re using a limited license. Get maximum access to Elementor AI.', 'elementor'));
+    action: /*#__PURE__*/_react.default.createElement(BannerActions, {
+      onClose: onClose
+    })
+  }, props, {
+    sx: _objectSpread({
+      backgroundColor: 'accent.main',
+      color: 'accent.contrastText'
+    }, sx)
+  }), __('You’re using a limited license. Get maximum access to Elementor AI.', 'elementor'));
 };
 UpgradeBanner.propTypes = {
   onClose: PropTypes.func,
@@ -3315,7 +2993,7 @@ var UpgradeChip = function UpgradeChip(_ref3) {
     display: "flex",
     alignItems: "center"
   }, /*#__PURE__*/_react.default.createElement(Chip, {
-    color: "promotion",
+    color: "accent",
     label: (0, _i18n.__)('Upgrade', 'elementor'),
     icon: /*#__PURE__*/_react.default.createElement(_icons.AIIcon, null),
     size: "small"
@@ -3358,14 +3036,14 @@ var UpgradeChip = function UpgradeChip(_ref3) {
     }, bullet)));
   })), /*#__PURE__*/_react.default.createElement(_ui.Button, {
     variant: "contained",
-    color: "promotion",
+    color: "accent",
     size: "small",
     href: actionUrl,
     target: "_blank",
     startIcon: /*#__PURE__*/_react.default.createElement(_icons.AIIcon, null),
     sx: {
       '&:hover': {
-        color: 'promotion.contrastText'
+        color: 'accent.contrastText'
       }
     }
   }, actionLabel))));
@@ -3401,36 +3079,24 @@ var _extends2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/he
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ "../node_modules/@babel/runtime/helpers/defineProperty.js"));
 var _ui = __webpack_require__(/*! @elementor/ui */ "@elementor/ui");
 var _excluded = ["onClose", "usagePercentage", "hasSubscription"];
-var _title, _description, _url, _title2, _description2, _url2, _title3, _description3, _url3;
+var _title, _url, _title2, _url2;
 var KEY_SUBSCRIPTION = 'subscription';
 var KEY_NO_SUBSCRIPTION = 'noSubscription';
 var alertConfigs = [{
   threshold: 95,
-  title: (_title = {}, (0, _defineProperty2.default)(_title, KEY_SUBSCRIPTION, __('You’ve used over 95% of your Elementor AI plan.', 'elementor')), (0, _defineProperty2.default)(_title, KEY_NO_SUBSCRIPTION, __('You’ve used 95% of credits for this AI feature.', 'elementor')), _title),
-  description: (_description = {}, (0, _defineProperty2.default)(_description, KEY_SUBSCRIPTION, __('Get maximum access.', 'elementor')), (0, _defineProperty2.default)(_description, KEY_NO_SUBSCRIPTION, __('Upgrade now to keep using this feature. You still have credits for other AI features (Text, Code, Images, Containers, etc.)', 'elementor')), _description),
+  title: (_title = {}, (0, _defineProperty2.default)(_title, KEY_SUBSCRIPTION, __('You’ve used over 95% of your Elementor AI plan.', 'elementor')), (0, _defineProperty2.default)(_title, KEY_NO_SUBSCRIPTION, __('You’ve used over 95% of the free trial.', 'elementor')), _title),
   url: (_url = {}, (0, _defineProperty2.default)(_url, KEY_SUBSCRIPTION, 'https://go.elementor.com/ai-banner-paid-95-limit-reach/'), (0, _defineProperty2.default)(_url, KEY_NO_SUBSCRIPTION, 'https://go.elementor.com/ai-banner-free-95-limit-reach/'), _url),
   color: 'error'
 }, {
   threshold: 80,
-  title: (_title2 = {}, (0, _defineProperty2.default)(_title2, KEY_SUBSCRIPTION, __('You’ve used over 80% of your Elementor AI plan.', 'elementor')), (0, _defineProperty2.default)(_title2, KEY_NO_SUBSCRIPTION, __('You’ve used 80% of credits for this AI feature.', 'elementor')), _title2),
-  description: (_description2 = {}, (0, _defineProperty2.default)(_description2, KEY_SUBSCRIPTION, __('Get maximum access.', 'elementor')), (0, _defineProperty2.default)(_description2, KEY_NO_SUBSCRIPTION, __('Upgrade now to keep using this feature. You still have credits for other AI features (Text, Code, Images, Containers, etc.)', 'elementor')), _description2),
+  title: (_title2 = {}, (0, _defineProperty2.default)(_title2, KEY_SUBSCRIPTION, __('You’ve used over 80% of your Elementor AI plan.', 'elementor')), (0, _defineProperty2.default)(_title2, KEY_NO_SUBSCRIPTION, __('You’ve used over 80% of the free trial.', 'elementor')), _title2),
   url: (_url2 = {}, (0, _defineProperty2.default)(_url2, KEY_SUBSCRIPTION, 'https://go.elementor.com/ai-banner-paid-80-limit-reach/'), (0, _defineProperty2.default)(_url2, KEY_NO_SUBSCRIPTION, 'https://go.elementor.com/ai-banner-free-80-limit-reach/'), _url2),
-  color: 'warning'
-}, {
-  threshold: 75,
-  title: (_title3 = {}, (0, _defineProperty2.default)(_title3, KEY_SUBSCRIPTION, __('You’ve used over 75% of your Elementor AI plan.', 'elementor')), (0, _defineProperty2.default)(_title3, KEY_NO_SUBSCRIPTION, __(' You’ve used 75% of credits for this AI feature.', 'elementor')), _title3),
-  description: (_description3 = {}, (0, _defineProperty2.default)(_description3, KEY_SUBSCRIPTION, __('Get maximum access.', 'elementor')), (0, _defineProperty2.default)(_description3, KEY_NO_SUBSCRIPTION, __('Upgrade now to keep using this feature. You still have credits for other AI features (Text, Code, Images, Containers, etc.)', 'elementor')), _description3),
-  url: (_url3 = {}, (0, _defineProperty2.default)(_url3, KEY_SUBSCRIPTION, 'https://go.elementor.com/ai-banner-paid-80-limit-reach/'), (0, _defineProperty2.default)(_url3, KEY_NO_SUBSCRIPTION, 'https://go.elementor.com/ai-banner-free-80-limit-reach/'), _url3),
   color: 'warning'
 }];
 var UpgradeButton = function UpgradeButton(props) {
   return /*#__PURE__*/_react.default.createElement(_ui.Button, (0, _extends2.default)({
-    color: "inherit",
-    variant: "outlined",
-    sx: {
-      border: '2px solid'
-    }
-  }, props), __('Upgrade now', 'elementor'));
+    color: "inherit"
+  }, props), __('Upgrade', 'elementor'));
 };
 var UsageLimitAlert = function UsageLimitAlert(_ref) {
   var onClose = _ref.onClose,
@@ -3446,7 +3112,6 @@ var UsageLimitAlert = function UsageLimitAlert(_ref) {
   }
   var subscriptionType = hasSubscription ? KEY_SUBSCRIPTION : KEY_NO_SUBSCRIPTION;
   var title = config.title,
-    description = config.description,
     url = config.url,
     color = config.color;
   var handleUpgradeClick = function handleUpgradeClick() {
@@ -3458,7 +3123,7 @@ var UsageLimitAlert = function UsageLimitAlert(_ref) {
       onClick: handleUpgradeClick
     }),
     color: color
-  }, props), /*#__PURE__*/_react.default.createElement(_ui.AlertTitle, null, title[subscriptionType]), description[subscriptionType]);
+  }, props), /*#__PURE__*/_react.default.createElement(_ui.AlertTitle, null, title[subscriptionType]), __('Get maximum access.', 'elementor'));
 };
 UsageLimitAlert.propTypes = {
   onClose: PropTypes.func,
@@ -3514,62 +3179,6 @@ UsageMessages.propTypes = {
   sx: PropTypes.object
 };
 var _default = UsageMessages;
-exports["default"] = _default;
-
-/***/ }),
-
-/***/ "../modules/ai/assets/js/editor/components/voice-promotion-alert.js":
-/*!**************************************************************************!*\
-  !*** ../modules/ai/assets/js/editor/components/voice-promotion-alert.js ***!
-  \**************************************************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-"use strict";
-/* provided dependency */ var __ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n")["__"];
-/* provided dependency */ var PropTypes = __webpack_require__(/*! prop-types */ "../node_modules/prop-types/index.js");
-
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = exports.VoicePromotionAlert = void 0;
-var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ "../node_modules/@babel/runtime/helpers/defineProperty.js"));
-var _react = _interopRequireDefault(__webpack_require__(/*! react */ "react"));
-var _ui = __webpack_require__(/*! @elementor/ui */ "@elementor/ui");
-var _bulbIcon = _interopRequireDefault(__webpack_require__(/*! ../icons/bulb-icon */ "../modules/ai/assets/js/editor/icons/bulb-icon.js"));
-var _useIntroduction2 = _interopRequireDefault(__webpack_require__(/*! ../hooks/use-introduction */ "../modules/ai/assets/js/editor/hooks/use-introduction.js"));
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
-var VoicePromotionAlert = function VoicePromotionAlert(props) {
-  var _useIntroduction = (0, _useIntroduction2.default)(props.introductionKey),
-    isViewed = _useIntroduction.isViewed,
-    markAsViewed = _useIntroduction.markAsViewed;
-  if (!isViewed) {
-    return null;
-  }
-  return /*#__PURE__*/_react.default.createElement(_ui.Box, {
-    sx: _objectSpread({
-      mt: 2
-    }, props.sx),
-    alignItems: "top"
-  }, /*#__PURE__*/_react.default.createElement(_ui.Alert, {
-    severity: "info",
-    variant: "standard",
-    icon: /*#__PURE__*/_react.default.createElement(_bulbIcon.default, {
-      sx: {
-        alignSelf: 'flex-start'
-      }
-    }),
-    onClose: markAsViewed
-  }, __('Get improved results from AI by adding some personal context. Go to Site Settings > AI Context to get started.')));
-};
-exports.VoicePromotionAlert = VoicePromotionAlert;
-VoicePromotionAlert.propTypes = {
-  sx: PropTypes.object,
-  introductionKey: PropTypes.string
-};
-var _default = VoicePromotionAlert;
 exports["default"] = _default;
 
 /***/ }),
@@ -3641,92 +3250,6 @@ exports["default"] = _default;
 
 /***/ }),
 
-/***/ "../modules/ai/assets/js/editor/context/requests-ids.js":
-/*!**************************************************************!*\
-  !*** ../modules/ai/assets/js/editor/context/requests-ids.js ***!
-  \**************************************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-"use strict";
-
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-var _typeof = __webpack_require__(/*! @babel/runtime/helpers/typeof */ "../node_modules/@babel/runtime/helpers/typeof.js");
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = exports.RequestIdsProvider = void 0;
-exports.generateIds = generateIds;
-exports.useRequestIds = exports.getUniqueId = void 0;
-var _react = _interopRequireWildcard(__webpack_require__(/*! react */ "react"));
-var _propTypes = _interopRequireDefault(__webpack_require__(/*! prop-types */ "../node_modules/prop-types/index.js"));
-function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-var Context = (0, _react.createContext)({});
-var useRequestIds = function useRequestIds() {
-  var context = (0, _react.useContext)(Context);
-  if (!context) {
-    throw new Error('useRequestIds must be used within a RequestIdsProvider');
-  }
-  return context;
-};
-exports.useRequestIds = useRequestIds;
-var getUniqueId = function getUniqueId(prefix) {
-  return prefix + '-' + Math.random().toString(16).substr(2, 7);
-};
-exports.getUniqueId = getUniqueId;
-window.EDITOR_SESSION_ID = window.EDITOR_SESSION_ID || getUniqueId('editor-session');
-function generateIds(template) {
-  var _template$elements;
-  template.id = getUniqueId().toString();
-  if ((_template$elements = template.elements) !== null && _template$elements !== void 0 && _template$elements.length) {
-    template.elements.map(function (child) {
-      return generateIds(child);
-    });
-  }
-  return template;
-}
-var RequestIdsProvider = function RequestIdsProvider(props) {
-  var editorSessionId = (0, _react.useRef)(window.EDITOR_SESSION_ID);
-  var sessionId = (0, _react.useRef)('');
-  var generateId = (0, _react.useRef)('');
-  var batchId = (0, _react.useRef)('');
-  var requestId = (0, _react.useRef)('');
-  sessionId.current = getUniqueId('session');
-  var setGenerate = function setGenerate() {
-    generateId.current = getUniqueId('generate');
-    return generateId;
-  };
-  var setBatch = function setBatch() {
-    batchId.current = getUniqueId('batch');
-    return batchId;
-  };
-  var setRequest = function setRequest() {
-    requestId.current = getUniqueId('request');
-    return requestId;
-  };
-  return /*#__PURE__*/_react.default.createElement(Context.Provider, {
-    value: {
-      editorSessionId: editorSessionId,
-      sessionId: sessionId,
-      generateId: generateId,
-      batchId: batchId,
-      requestId: requestId,
-      setGenerate: setGenerate,
-      setBatch: setBatch,
-      setRequest: setRequest
-    }
-  }, props.children);
-};
-exports.RequestIdsProvider = RequestIdsProvider;
-RequestIdsProvider.propTypes = {
-  children: _propTypes.default.node.isRequired
-};
-var _default = Context;
-exports["default"] = _default;
-
-/***/ }),
-
 /***/ "../modules/ai/assets/js/editor/helpers/date-helpers.js":
 /*!**************************************************************!*\
   !*** ../modules/ai/assets/js/editor/helpers/date-helpers.js ***!
@@ -3777,83 +3300,6 @@ exports.daysDiff = daysDiff;
 
 /***/ }),
 
-/***/ "../modules/ai/assets/js/editor/helpers/focus-out-listener.js":
-/*!********************************************************************!*\
-  !*** ../modules/ai/assets/js/editor/helpers/focus-out-listener.js ***!
-  \********************************************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-"use strict";
-/* provided dependency */ var PropTypes = __webpack_require__(/*! prop-types */ "../node_modules/prop-types/index.js");
-
-
-var _typeof = __webpack_require__(/*! @babel/runtime/helpers/typeof */ "../node_modules/@babel/runtime/helpers/typeof.js");
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports.FocusOutListener = FocusOutListener;
-exports.useFocusOutListener = useFocusOutListener;
-var React = _interopRequireWildcard(__webpack_require__(/*! react */ "react"));
-function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-function FocusOutListener(_ref) {
-  var children = _ref.children,
-    listener = _ref.listener,
-    onFocusOut = _ref.onFocusOut;
-  var indicatorRef = listener.indicatorRef,
-    reset = listener.reset,
-    remove = listener.remove,
-    runAction = listener.runAction;
-  React.useEffect(function () {
-    reset();
-    return remove();
-  }, []);
-  return /*#__PURE__*/React.createElement(React.Fragment, null, children, /*#__PURE__*/React.createElement("input", {
-    style: {
-      width: 0,
-      height: 0,
-      padding: 0,
-      margin: 0,
-      outline: 0,
-      border: 0,
-      opacity: 0,
-      position: 'fixed'
-    },
-    onFocus: remove,
-    onBlur: function onBlur() {
-      return runAction(onFocusOut);
-    },
-    ref: indicatorRef
-  }));
-}
-function useFocusOutListener() {
-  var focusOutTimeout = React.useRef(null);
-  var indicatorRef = React.useRef(null);
-  var reset = function reset() {
-    var _indicatorRef$current;
-    return (_indicatorRef$current = indicatorRef.current) === null || _indicatorRef$current === void 0 ? void 0 : _indicatorRef$current.focus();
-  };
-  var remove = function remove() {
-    return clearTimeout(focusOutTimeout.current);
-  };
-  var runAction = function runAction(callback) {
-    focusOutTimeout.current = setTimeout(callback, 250);
-  };
-  return {
-    indicatorRef: indicatorRef,
-    reset: reset,
-    remove: remove,
-    runAction: runAction
-  };
-}
-FocusOutListener.propTypes = {
-  children: PropTypes.node,
-  listener: PropTypes.object,
-  onFocusOut: PropTypes.func
-};
-
-/***/ }),
-
 /***/ "../modules/ai/assets/js/editor/helpers/index.js":
 /*!*******************************************************!*\
   !*** ../modules/ai/assets/js/editor/helpers/index.js ***!
@@ -3890,14 +3336,11 @@ Object.defineProperty(exports, "__esModule", ({
 }));
 exports["default"] = void 0;
 var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ "../node_modules/@babel/runtime/regenerator/index.js"));
-var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ "../node_modules/@babel/runtime/helpers/defineProperty.js"));
 var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "../node_modules/@babel/runtime/helpers/asyncToGenerator.js"));
 var _api = __webpack_require__(/*! ../api */ "../modules/ai/assets/js/editor/api/index.js");
 var _usePrompt = _interopRequireDefault(__webpack_require__(/*! ./use-prompt */ "../modules/ai/assets/js/editor/hooks/use-prompt.js"));
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 var getCodeResult = /*#__PURE__*/function () {
-  var _ref2 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(payload, _ref) {
+  var _ref2 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(prompt, _ref) {
     var codeLanguage, htmlMarkup, elementId;
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) switch (_context.prev = _context.next) {
@@ -3907,14 +3350,9 @@ var getCodeResult = /*#__PURE__*/function () {
             _context.next = 3;
             break;
           }
-          return _context.abrupt("return", (0, _api.getCustomCSS)(_objectSpread(_objectSpread({}, payload), {}, {
-            html_markup: htmlMarkup,
-            element_id: elementId
-          })));
+          return _context.abrupt("return", (0, _api.getCustomCSS)(prompt, htmlMarkup, elementId));
         case 3:
-          return _context.abrupt("return", (0, _api.getCustomCode)(_objectSpread(_objectSpread({}, payload), {}, {
-            language: codeLanguage
-          })));
+          return _context.abrupt("return", (0, _api.getCustomCode)(prompt, codeLanguage));
         case 4:
         case "end":
           return _context.stop();
@@ -3930,8 +3368,8 @@ var useCodePrompt = function useCodePrompt(_ref3) {
     htmlMarkup = _ref3.htmlMarkup,
     elementId = _ref3.elementId,
     credits = _ref3.initialCredits;
-  var promptData = (0, _usePrompt.default)(function (payload) {
-    return getCodeResult(payload, {
+  var promptData = (0, _usePrompt.default)(function (promptValue) {
+    return getCodeResult(promptValue, {
       codeLanguage: codeLanguage,
       htmlMarkup: htmlMarkup,
       elementId: elementId
@@ -4375,7 +3813,6 @@ var _slicedToArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/runt
 var _objectWithoutProperties2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/objectWithoutProperties */ "../node_modules/@babel/runtime/helpers/objectWithoutProperties.js"));
 var _react = __webpack_require__(/*! react */ "react");
 var _api = __webpack_require__(/*! ../api */ "../modules/ai/assets/js/editor/api/index.js");
-var _requestsIds = __webpack_require__(/*! ../context/requests-ids */ "../modules/ai/assets/js/editor/context/requests-ids.js");
 var _excluded = ["text", "response_id", "usage", "images"];
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
@@ -4412,32 +3849,22 @@ var usePrompt = function usePrompt(fetchData, initialState) {
     _useState6 = (0, _slicedToArray2.default)(_useState5, 2),
     data = _useState6[0],
     setData = _useState6[1];
-  var _useRequestIds = (0, _requestsIds.useRequestIds)(),
-    setRequest = _useRequestIds.setRequest,
-    editorSessionId = _useRequestIds.editorSessionId,
-    sessionId = _useRequestIds.sessionId,
-    generateId = _useRequestIds.generateId,
-    batchId = _useRequestIds.batchId;
   var send = /*#__PURE__*/function () {
-    var _ref2 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(payload) {
+    var _ref2 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
+      var _len,
+        args,
+        _key,
+        _args = arguments;
       return _regenerator.default.wrap(function _callee$(_context) {
         while (1) switch (_context.prev = _context.next) {
           case 0:
+            for (_len = _args.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+              args[_key] = _args[_key];
+            }
             return _context.abrupt("return", new Promise(function (resolve, reject) {
               setError('');
               setIsLoading(true);
-              var requestId = setRequest();
-              var requestIds = {
-                editorSessionId: editorSessionId.current,
-                sessionId: sessionId.current,
-                generateId: generateId.current,
-                batchId: batchId.current,
-                requestId: requestId.current
-              };
-              payload = _objectSpread(_objectSpread({}, payload), {}, {
-                requestIds: requestIds
-              });
-              fetchData(payload).then(function (result) {
+              fetchData.apply(void 0, args).then(function (result) {
                 var normalizedData = normalizeResponse(result);
                 setData(normalizedData);
                 resolve(normalizedData);
@@ -4449,13 +3876,13 @@ var usePrompt = function usePrompt(fetchData, initialState) {
                 return setIsLoading(false);
               });
             }));
-          case 1:
+          case 2:
           case "end":
             return _context.stop();
         }
       }, _callee);
     }));
-    return function send(_x) {
+    return function send() {
       return _ref2.apply(this, arguments);
     };
   }();
@@ -4499,6 +3926,48 @@ exports["default"] = _default;
 
 /***/ }),
 
+/***/ "../modules/ai/assets/js/editor/hooks/use-session-storage.js":
+/*!*******************************************************************!*\
+  !*** ../modules/ai/assets/js/editor/hooks/use-session-storage.js ***!
+  \*******************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+var _slicedToArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "../node_modules/@babel/runtime/helpers/slicedToArray.js"));
+var _react = __webpack_require__(/*! react */ "react");
+var useSessionStorage = function useSessionStorage(storageKey) {
+  var initialValue = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  var getSessionStorageData = function getSessionStorageData() {
+    return JSON.parse(sessionStorage.getItem(storageKey)) || initialValue;
+  };
+  var setSessionStorageData = function setSessionStorageData(value) {
+    return sessionStorage.setItem(storageKey, JSON.stringify(value));
+  };
+  var _useState = (0, _react.useState)(getSessionStorageData()),
+    _useState2 = (0, _slicedToArray2.default)(_useState, 2),
+    data = _useState2[0],
+    setData = _useState2[1];
+  var setStateAndSessionData = function setStateAndSessionData(value) {
+    setSessionStorageData(value);
+    setData(value);
+  };
+  return {
+    data: data,
+    setStateAndSessionData: setStateAndSessionData
+  };
+};
+var _default = useSessionStorage;
+exports["default"] = _default;
+
+/***/ }),
+
 /***/ "../modules/ai/assets/js/editor/hooks/use-text-prompt.js":
 /*!***************************************************************!*\
   !*** ../modules/ai/assets/js/editor/hooks/use-text-prompt.js ***!
@@ -4518,24 +3987,24 @@ var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/r
 var _api = __webpack_require__(/*! ../api */ "../modules/ai/assets/js/editor/api/index.js");
 var _usePrompt = _interopRequireDefault(__webpack_require__(/*! ./use-prompt */ "../modules/ai/assets/js/editor/hooks/use-prompt.js"));
 var getTextResult = /*#__PURE__*/function () {
-  var _ref = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(payload) {
+  var _ref = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(prompt, instruction) {
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) switch (_context.prev = _context.next) {
         case 0:
-          if (!(payload !== null && payload !== void 0 && payload.instruction)) {
+          if (!instruction) {
             _context.next = 2;
             break;
           }
-          return _context.abrupt("return", (0, _api.getEditText)(payload));
+          return _context.abrupt("return", (0, _api.getEditText)(prompt, instruction));
         case 2:
-          return _context.abrupt("return", (0, _api.getCompletionText)(payload));
+          return _context.abrupt("return", (0, _api.getCompletionText)(prompt));
         case 3:
         case "end":
           return _context.stop();
       }
     }, _callee);
   }));
-  return function getTextResult(_x) {
+  return function getTextResult(_x, _x2) {
     return _ref.apply(this, arguments);
   };
 }();
@@ -4622,6 +4091,7 @@ var useUserInfo = function useUserInfo() {
       is_connected: false,
       is_get_started: false,
       connect_url: '',
+      builder_url: '',
       usage: {
         hasAiSubscription: false,
         quota: 0,
@@ -4709,65 +4179,6 @@ var BrushIcon = _react.default.forwardRef(function (props, ref) {
   }));
 });
 var _default = BrushIcon;
-exports["default"] = _default;
-
-/***/ }),
-
-/***/ "../modules/ai/assets/js/editor/icons/bulb-icon.js":
-/*!*********************************************************!*\
-  !*** ../modules/ai/assets/js/editor/icons/bulb-icon.js ***!
-  \*********************************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-"use strict";
-
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-var _extends2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/extends */ "../node_modules/@babel/runtime/helpers/extends.js"));
-var _react = _interopRequireDefault(__webpack_require__(/*! react */ "react"));
-var _ui = __webpack_require__(/*! @elementor/ui */ "@elementor/ui");
-var BulbIcon = _react.default.forwardRef(function (props, ref) {
-  return /*#__PURE__*/_react.default.createElement(_ui.SvgIcon, (0, _extends2.default)({}, props, {
-    ref: ref
-  }), /*#__PURE__*/_react.default.createElement("svg", {
-    width: "22",
-    height: "22",
-    viewBox: "0 0 22 22",
-    fill: "none",
-    xmlns: "http://www.w3.org/2000/svg"
-  }, /*#__PURE__*/_react.default.createElement("g", {
-    clipPath: "url(#clip0_10743_8902)"
-  }, /*#__PURE__*/_react.default.createElement("path", {
-    d: "M2.75 10.0833H3.66667M11 2.75V3.66667M18.3333 10.0833H19.25M5.13333 5.13333L5.775 5.775M16.8667 5.13333L16.225 5.775",
-    stroke: "#2563EB",
-    strokeWidth: "1.5",
-    strokeLinecap: "round",
-    strokeLinejoin: "round"
-  }), /*#__PURE__*/_react.default.createElement("path", {
-    d: "M9.16675 16.041C8.70841 15.1243 6.91205 13.2842 6.62523 12.366C6.3384 11.4477 6.34775 10.4626 6.65195 9.54997C6.95615 8.63738 7.53978 7.84362 8.32016 7.28116C9.10054 6.71869 10.0381 6.41602 11.0001 6.41602C11.962 6.41602 12.8996 6.71869 13.68 7.28116C14.4604 7.84362 15.044 8.63738 15.3482 9.54997C15.6524 10.4626 15.6618 11.4477 15.3749 12.366C15.0881 13.2842 13.2917 15.1243 12.8334 16.041C12.8334 16.041 12.7597 17.3762 12.8334 17.8743C12.8334 18.3606 12.6403 18.8269 12.2964 19.1707C11.9526 19.5145 11.4863 19.7077 11.0001 19.7077C10.5139 19.7077 10.0475 19.5145 9.70372 19.1707C9.3599 18.8269 9.16675 18.3606 9.16675 17.8743C9.2405 17.3762 9.16675 16.041 9.16675 16.041Z",
-    stroke: "#2563EB",
-    strokeWidth: "1.5",
-    strokeLinecap: "round",
-    strokeLinejoin: "round"
-  }), /*#__PURE__*/_react.default.createElement("path", {
-    d: "M10.0833 16.5H11.9166",
-    stroke: "#2563EB",
-    strokeWidth: "1.5",
-    strokeLinecap: "round",
-    strokeLinejoin: "round"
-  })), /*#__PURE__*/_react.default.createElement("defs", null, /*#__PURE__*/_react.default.createElement("clipPath", {
-    id: "clip0_10743_8902"
-  }, /*#__PURE__*/_react.default.createElement("rect", {
-    width: "22",
-    height: "22",
-    fill: "white"
-  })))));
-});
-var _default = BulbIcon;
 exports["default"] = _default;
 
 /***/ }),
@@ -5537,7 +4948,7 @@ var Module = /*#__PURE__*/function (_elementorModules$edi) {
             type: aiOptions.type,
             buttonLabel: (0, _i18n.__)('Create with AI', 'elementor'),
             getControlValue: view.getControlValue.bind(view),
-            setControlValue: function setControlValue() {},
+            setControlValue: function setControlValue(value) {},
             controlView: view,
             additionalOptions: {
               defaultValue: view.options.model.get('default'),
@@ -5552,10 +4963,9 @@ var Module = /*#__PURE__*/function (_elementorModules$edi) {
   }, {
     key: "getContextData",
     value: function getContextData(view, controlType) {
-      var controlName = view.options.model.get('name');
       if (!view.options.container) {
         return {
-          controlName: controlName,
+          controlName: view.options.model.get('name'),
           controlType: controlType
         };
       }
@@ -5564,9 +4974,8 @@ var Module = /*#__PURE__*/function (_elementorModules$edi) {
         elementType: view.options.container.args.model.get('elType'),
         elementId: view.options.container.id,
         widgetType: view.options.container.args.model.get('widgetType'),
-        controlName: controlName,
-        controlType: controlType,
-        controlValue: view.options.container.settings.get(controlName)
+        controlName: view.options.model.get('name'),
+        controlType: controlType
       };
     }
   }]);
@@ -5978,9 +5387,6 @@ var _promptErrorMessage = _interopRequireDefault(__webpack_require__(/*! ../../c
 var _codeBlock = _interopRequireDefault(__webpack_require__(/*! ./code-block */ "../modules/ai/assets/js/editor/pages/form-code/code-block.js"));
 var _useCodePrompt2 = _interopRequireDefault(__webpack_require__(/*! ../../hooks/use-code-prompt */ "../modules/ai/assets/js/editor/hooks/use-code-prompt.js"));
 var _promptHistoryActionContext = __webpack_require__(/*! ../../components/prompt-history/context/prompt-history-action-context */ "../modules/ai/assets/js/editor/components/prompt-history/context/prompt-history-action-context.js");
-var _promptLibraryLink = _interopRequireDefault(__webpack_require__(/*! ../../components/prompt-library-link */ "../modules/ai/assets/js/editor/components/prompt-library-link.js"));
-var _requestsIds = __webpack_require__(/*! ../../context/requests-ids */ "../modules/ai/assets/js/editor/context/requests-ids.js");
-var _voicePromotionAlert = __webpack_require__(/*! ../../components/voice-promotion-alert */ "../modules/ai/assets/js/editor/components/voice-promotion-alert.js");
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
@@ -6021,8 +5427,6 @@ var FormCode = function FormCode(_ref) {
     _useState2 = (0, _slicedToArray2.default)(_useState, 2),
     prompt = _useState2[0],
     setPrompt = _useState2[1];
-  var _useRequestIds = (0, _requestsIds.useRequestIds)(),
-    setGenerate = _useRequestIds.setGenerate;
   (0, _promptHistoryActionContext.useSubscribeOnPromptHistoryAction)([{
     type: _promptHistoryActionContext.ACTION_TYPES.REUSE,
     handler: function handler(action) {
@@ -6031,16 +5435,7 @@ var FormCode = function FormCode(_ref) {
     }
   }]);
   var lastRun = (0, _react.useRef)(function () {});
-  var autocompleteItems = _actionsData.codeHtmlAutocomplete;
-  var promptLibraryLink = '';
-  if ('css' === (additionalOptions === null || additionalOptions === void 0 ? void 0 : additionalOptions.codeLanguage)) {
-    autocompleteItems = _actionsData.codeCssAutocomplete;
-    promptLibraryLink = 'https://go.elementor.com/ai-prompt-library-css/';
-  } else if (additionalOptions !== null && additionalOptions !== void 0 && additionalOptions.htmlMarkup) {
-    promptLibraryLink = 'https://go.elementor.com/ai-prompt-library-html/';
-  } else {
-    promptLibraryLink = 'https://go.elementor.com/ai-prompt-library-custom-code/';
-  }
+  var autocompleteItems = 'css' === (additionalOptions === null || additionalOptions === void 0 ? void 0 : additionalOptions.codeLanguage) ? _actionsData.codeCssAutocomplete : _actionsData.codeHtmlAutocomplete;
   var showSuggestions = !prompt;
   var handleSubmit = /*#__PURE__*/function () {
     var _ref2 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(event) {
@@ -6048,14 +5443,11 @@ var FormCode = function FormCode(_ref) {
         while (1) switch (_context.prev = _context.next) {
           case 0:
             event.preventDefault();
-            setGenerate();
             lastRun.current = function () {
-              return send({
-                prompt: prompt
-              });
+              return send(prompt);
             };
             lastRun.current();
-          case 4:
+          case 3:
           case "end":
             return _context.stop();
         }
@@ -6097,9 +5489,7 @@ var FormCode = function FormCode(_ref) {
   })), showSuggestions && /*#__PURE__*/_react.default.createElement(_promptSuggestions.default, {
     suggestions: autocompleteItems,
     onSelect: setPrompt
-  }, /*#__PURE__*/_react.default.createElement(_promptLibraryLink.default, {
-    libraryLink: promptLibraryLink
-  })), /*#__PURE__*/_react.default.createElement(_ui.Stack, {
+  }), /*#__PURE__*/_react.default.createElement(_ui.Stack, {
     direction: "row",
     alignItems: "center",
     sx: {
@@ -6119,9 +5509,7 @@ var FormCode = function FormCode(_ref) {
         }));
       }
     }
-  }, data.result), /*#__PURE__*/_react.default.createElement(_voicePromotionAlert.VoicePromotionAlert, {
-    introductionKey: "ai-context-code-promotion"
-  }), /*#__PURE__*/_react.default.createElement(_ui.Stack, {
+  }, data.result), /*#__PURE__*/_react.default.createElement(_ui.Stack, {
     direction: "row",
     alignItems: "center",
     sx: {
@@ -6196,7 +5584,9 @@ var ConfigProvider = function ConfigProvider(props) {
       onSelect: props.onSelect,
       onGenerate: props.onGenerate,
       currentContext: props.currentContext,
-      hasPro: props.hasPro
+      hasPro: props.hasPro,
+      sessionId: props.sessionId,
+      editorSessionId: props.editorSessionId
     }
   }, props.children);
 };
@@ -6212,7 +5602,9 @@ ConfigProvider.propTypes = {
   onSelect: _propTypes.default.func.isRequired,
   onGenerate: _propTypes.default.func.isRequired,
   currentContext: _propTypes.default.object,
-  hasPro: _propTypes.default.bool
+  hasPro: _propTypes.default.bool,
+  sessionId: _propTypes.default.string,
+  editorSessionId: _propTypes.default.string
 };
 var _default = ConfigContext;
 exports["default"] = _default;
@@ -6465,14 +5857,11 @@ var _react = _interopRequireDefault(__webpack_require__(/*! react */ "react"));
 var _extends2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/extends */ "../node_modules/@babel/runtime/helpers/extends.js"));
 var _generateButton = _interopRequireDefault(__webpack_require__(/*! ../../../components/generate-button */ "../modules/ai/assets/js/editor/components/generate-button.js"));
 var _i18n = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
-var _voicePromotionAlert = _interopRequireDefault(__webpack_require__(/*! ../../../components/voice-promotion-alert */ "../modules/ai/assets/js/editor/components/voice-promotion-alert.js"));
 var GenerateImagesSubmit = function GenerateImagesSubmit(props) {
-  return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement(_generateButton.default, (0, _extends2.default)({
+  return /*#__PURE__*/_react.default.createElement(_generateButton.default, (0, _extends2.default)({
     size: "medium",
     fullWidth: true
-  }, props), (0, _i18n.__)('Generate images', 'elementor')), /*#__PURE__*/_react.default.createElement(_voicePromotionAlert.default, {
-    introductionKey: "ai-context-media-promotion"
-  }));
+  }, props), (0, _i18n.__)('Generate images', 'elementor'));
 };
 var _default = GenerateImagesSubmit;
 exports["default"] = _default;
@@ -7493,6 +6882,7 @@ var _generateLoader = _interopRequireDefault(__webpack_require__(/*! ./generate-
 var _promptErrorMessage = _interopRequireDefault(__webpack_require__(/*! ../../../components/prompt-error-message */ "../modules/ai/assets/js/editor/components/prompt-error-message.js"));
 var _backButton = _interopRequireDefault(__webpack_require__(/*! ./back-button */ "../modules/ai/assets/js/editor/pages/form-media/components/back-button.js"));
 var _locationContext = __webpack_require__(/*! ../context/location-context */ "../modules/ai/assets/js/editor/pages/form-media/context/location-context.js");
+var _useUpgradeMessage = _interopRequireDefault(__webpack_require__(/*! ../../../hooks/use-upgrade-message */ "../modules/ai/assets/js/editor/hooks/use-upgrade-message.js"));
 var _globalSettingsContext = __webpack_require__(/*! ../context/global-settings-context */ "../modules/ai/assets/js/editor/pages/form-media/context/global-settings-context.js");
 var _usageMessages = _interopRequireDefault(__webpack_require__(/*! ../../../components/usage-messages */ "../modules/ai/assets/js/editor/components/usage-messages.js"));
 var _excluded = ["sx"],
@@ -8763,6 +8153,7 @@ exports["default"] = void 0;
 var _slicedToArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "../node_modules/@babel/runtime/helpers/slicedToArray.js"));
 var _react = __webpack_require__(/*! react */ "react");
 var _useImagesPreload2 = _interopRequireDefault(__webpack_require__(/*! ../../../../../hooks/use-images-preload */ "../modules/ai/assets/js/editor/hooks/use-images-preload.js"));
+var _useSessionStorage2 = _interopRequireDefault(__webpack_require__(/*! ../../../../../hooks/use-session-storage */ "../modules/ai/assets/js/editor/hooks/use-session-storage.js"));
 var shuffleImages = function shuffleImages(images) {
   return images.map(function (image) {
     return [Math.random(), image];
@@ -8784,12 +8175,11 @@ var useSuggestedImages = function useSuggestedImages(_ref7) {
     _useState2 = (0, _slicedToArray2.default)(_useState, 2),
     isLoading = _useState2[0],
     setIsLoading = _useState2[1];
-  var _useState3 = (0, _react.useState)({
+  var _useSessionStorage = (0, _useSessionStorage2.default)('ai-image-gallery', {
       images: []
     }),
-    _useState4 = (0, _slicedToArray2.default)(_useState3, 2),
-    data = _useState4[0],
-    setImagesState = _useState4[1];
+    data = _useSessionStorage.data,
+    setStateAndSessionData = _useSessionStorage.setStateAndSessionData;
   var _useImagesPreload = (0, _useImagesPreload2.default)(),
     ready = _useImagesPreload.ready,
     preloadImages = _useImagesPreload.preloadImages;
@@ -8811,7 +8201,7 @@ var useSuggestedImages = function useSuggestedImages(_ref7) {
     fetch('https://my.elementor.com/ai/images-prompt-gallery/ai-gallery.json').then(function (response) {
       return response.json();
     }).then(function (json) {
-      return setImagesState(json);
+      return setStateAndSessionData(json);
     })
     // eslint-disable-next-line no-console
     .catch(function (e) {
@@ -8902,8 +8292,6 @@ var _useTextToImage2 = _interopRequireDefault(__webpack_require__(/*! ./hooks/us
 var _useImageActions2 = _interopRequireDefault(__webpack_require__(/*! ../../hooks/use-image-actions */ "../modules/ai/assets/js/editor/pages/form-media/hooks/use-image-actions.js"));
 var _globalSettingsContext = __webpack_require__(/*! ../../context/global-settings-context */ "../modules/ai/assets/js/editor/pages/form-media/context/global-settings-context.js");
 var _promptHistoryActionContext = __webpack_require__(/*! ../../../../components/prompt-history/context/prompt-history-action-context */ "../modules/ai/assets/js/editor/components/prompt-history/context/prompt-history-action-context.js");
-var _promptLibraryLink = _interopRequireDefault(__webpack_require__(/*! ../../../../components/prompt-library-link */ "../modules/ai/assets/js/editor/components/prompt-library-link.js"));
-var _requestsIds = __webpack_require__(/*! ../../../../context/requests-ids */ "../modules/ai/assets/js/editor/context/requests-ids.js");
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 var getPromptPlaceholder = function getPromptPlaceholder(images) {
@@ -8918,8 +8306,6 @@ var Generate = function Generate() {
     _useState2 = (0, _slicedToArray2.default)(_useState, 2),
     prompt = _useState2[0],
     setPrompt = _useState2[1];
-  var _useRequestIds = (0, _requestsIds.useRequestIds)(),
-    setGenerate = _useRequestIds.setGenerate;
   var _useGlobalSettings = (0, _globalSettingsContext.useGlobalSettings)(),
     initialImageType = _useGlobalSettings.initialImageType;
   var _usePromptSettings = (0, _usePromptSettings2.default)({
@@ -8953,11 +8339,7 @@ var Generate = function Generate() {
   }, [generatedImages === null || generatedImages === void 0 ? void 0 : generatedImages.result]);
   var handleSubmit = function handleSubmit(event) {
     event.preventDefault();
-    setGenerate();
-    send({
-      prompt: prompt,
-      settings: settings
-    });
+    send(prompt, settings);
   };
   var handleCopyPrompt = function handleCopyPrompt(_ref) {
     var _updateSettings;
@@ -9041,13 +8423,7 @@ var Generate = function Generate() {
     onEditImage: edit
   }) : /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement(_view.default.ContentHeading, {
     primary: (0, _i18n.__)('Spark your imagination with images generated by our community', 'elementor')
-  }), /*#__PURE__*/_react.default.createElement(_ui.Stack, {
-    sx: {
-      mb: 3
-    }
-  }, /*#__PURE__*/_react.default.createElement(_promptLibraryLink.default, {
-    libraryLink: "https://go.elementor.com/ai-prompt-library-image/"
-  })), /*#__PURE__*/_react.default.createElement(_gallery.default, {
+  }), /*#__PURE__*/_react.default.createElement(_gallery.default, {
     cols: 3
   }, suggestedImages === null || suggestedImages === void 0 ? void 0 : suggestedImages.map(function (suggestedPrompt) {
     return /*#__PURE__*/_react.default.createElement(_gallery.default.Image, {
@@ -9378,8 +8754,8 @@ exports["default"] = void 0;
 var _api = __webpack_require__(/*! ../../../../../api */ "../modules/ai/assets/js/editor/api/index.js");
 var _useImagePrompt = _interopRequireDefault(__webpack_require__(/*! ../../../hooks/use-image-prompt */ "../modules/ai/assets/js/editor/pages/form-media/hooks/use-image-prompt.js"));
 var useInPainting = function useInPainting(initialValue) {
-  var fetchAction = function fetchAction(payload) {
-    return (0, _api.getImageToImageMaskGeneration)(payload);
+  var fetchAction = function fetchAction(prompt, promptSettings, image, mask) {
+    return (0, _api.getImageToImageMaskGeneration)(prompt, promptSettings, image, mask);
   };
   return (0, _useImagePrompt.default)(fetchAction, initialValue);
 };
@@ -9655,7 +9031,6 @@ var _usePromptSettings2 = _interopRequireDefault(__webpack_require__(/*! ../../h
 var _useInPainting2 = _interopRequireDefault(__webpack_require__(/*! ./hooks/use-in-painting */ "../modules/ai/assets/js/editor/pages/form-media/views/in-painting/hooks/use-in-painting.js"));
 var _editImageContext = __webpack_require__(/*! ../../context/edit-image-context */ "../modules/ai/assets/js/editor/pages/form-media/context/edit-image-context.js");
 var _useImageActions2 = _interopRequireDefault(__webpack_require__(/*! ../../hooks/use-image-actions */ "../modules/ai/assets/js/editor/pages/form-media/hooks/use-image-actions.js"));
-var _requestsIds = __webpack_require__(/*! ../../../../context/requests-ids */ "../modules/ai/assets/js/editor/context/requests-ids.js");
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 var InPainting = function InPainting() {
@@ -9663,8 +9038,6 @@ var InPainting = function InPainting() {
     _useState2 = (0, _slicedToArray2.default)(_useState, 2),
     prompt = _useState2[0],
     setPrompt = _useState2[1];
-  var _useRequestIds = (0, _requestsIds.useRequestIds)(),
-    setGenerate = _useRequestIds.setGenerate;
   var _useState3 = (0, _react.useState)(''),
     _useState4 = (0, _slicedToArray2.default)(_useState3, 2),
     mask = _useState4[0],
@@ -9692,13 +9065,7 @@ var InPainting = function InPainting() {
 
     // The fallback instruction should be hidden for the user.
     var finalPrompt = prompt || 'Remove object and fill based on the surroundings';
-    setGenerate();
-    send({
-      prompt: finalPrompt,
-      settings: settings,
-      image: editImage,
-      mask: mask
-    });
+    send(finalPrompt, settings, editImage, mask);
   };
   return /*#__PURE__*/_react.default.createElement(_view.default, null, /*#__PURE__*/_react.default.createElement(_view.default.Panel, null, /*#__PURE__*/_react.default.createElement(_view.default.BackButton, null), /*#__PURE__*/_react.default.createElement(_view.default.PanelHeading, {
     primary: (0, _i18n.__)('Generative Fill', 'elementor'),
@@ -9765,8 +9132,8 @@ exports["default"] = void 0;
 var _api = __webpack_require__(/*! ../../../../../api */ "../modules/ai/assets/js/editor/api/index.js");
 var _useImagePrompt = _interopRequireDefault(__webpack_require__(/*! ../../../hooks/use-image-prompt */ "../modules/ai/assets/js/editor/pages/form-media/hooks/use-image-prompt.js"));
 var useOutPainting = function useOutPainting(initialValue) {
-  var fetchAction = function fetchAction(payload) {
-    return (0, _api.getImageToImageOutPainting)(payload);
+  var fetchAction = function fetchAction(prompt, promptSettings, image, mask) {
+    return (0, _api.getImageToImageOutPainting)(prompt, promptSettings, image, mask);
   };
   return (0, _useImagePrompt.default)(fetchAction, initialValue);
 };
@@ -9808,7 +9175,6 @@ var _editImageContext = __webpack_require__(/*! ../../context/edit-image-context
 var _useImageActions2 = _interopRequireDefault(__webpack_require__(/*! ../../hooks/use-image-actions */ "../modules/ai/assets/js/editor/pages/form-media/hooks/use-image-actions.js"));
 var _usePromptSettings2 = _interopRequireWildcard(__webpack_require__(/*! ../../hooks/use-prompt-settings */ "../modules/ai/assets/js/editor/pages/form-media/hooks/use-prompt-settings.js"));
 var _useOutPainting2 = _interopRequireDefault(__webpack_require__(/*! ./hooks/use-out-painting */ "../modules/ai/assets/js/editor/pages/form-media/views/out-painting/hooks/use-out-painting.js"));
-var _requestsIds = __webpack_require__(/*! ../../../../context/requests-ids */ "../modules/ai/assets/js/editor/context/requests-ids.js");
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 var OutPainting = function OutPainting() {
@@ -9816,8 +9182,6 @@ var OutPainting = function OutPainting() {
     _useState2 = (0, _slicedToArray2.default)(_useState, 2),
     prompt = _useState2[0],
     setPrompt = _useState2[1];
-  var _useRequestIds = (0, _requestsIds.useRequestIds)(),
-    setGenerate = _useRequestIds.setGenerate;
   var _useEditImage = (0, _editImageContext.useEditImage)(),
     editImage = _useEditImage.editImage,
     initialAspectRatio = _useEditImage.aspectRatio;
@@ -9851,13 +9215,7 @@ var OutPainting = function OutPainting() {
 
     // The fallback instruction should be hidden for the user.
     var finalPrompt = prompt || 'Fill based on the surroundings';
-    setGenerate();
-    send({
-      prompt: finalPrompt,
-      settings: settings,
-      image: editImage,
-      mask: mask
-    });
+    send(finalPrompt, settings, editImage, mask);
   };
   return /*#__PURE__*/_react.default.createElement(_view.default, null, /*#__PURE__*/_react.default.createElement(_view.default.Panel, null, /*#__PURE__*/_react.default.createElement(_view.default.BackButton, null), /*#__PURE__*/_react.default.createElement(_view.default.PanelHeading, {
     primary: (0, _i18n.__)('Expand Image', 'elementor'),
@@ -10051,8 +9409,8 @@ exports["default"] = void 0;
 var _api = __webpack_require__(/*! ../../../../../api */ "../modules/ai/assets/js/editor/api/index.js");
 var _useImagePrompt = _interopRequireDefault(__webpack_require__(/*! ../../../hooks/use-image-prompt */ "../modules/ai/assets/js/editor/pages/form-media/hooks/use-image-prompt.js"));
 var useRemoveBackground = function useRemoveBackground(initialValue) {
-  var fetchAction = function fetchAction(payload) {
-    return (0, _api.getImageToImageRemoveBackground)(payload);
+  var fetchAction = function fetchAction(image) {
+    return (0, _api.getImageToImageRemoveBackground)(image);
   };
   return (0, _useImagePrompt.default)(fetchAction, initialValue);
 };
@@ -10090,12 +9448,9 @@ var _newPromptButton = _interopRequireDefault(__webpack_require__(/*! ../../comp
 var _constants = __webpack_require__(/*! ../../constants */ "../modules/ai/assets/js/editor/pages/form-media/constants/index.js");
 var _locationContext = __webpack_require__(/*! ../../context/location-context */ "../modules/ai/assets/js/editor/pages/form-media/context/location-context.js");
 var _useImageSize2 = _interopRequireDefault(__webpack_require__(/*! ../../hooks/use-image-size */ "../modules/ai/assets/js/editor/pages/form-media/hooks/use-image-size.js"));
-var _requestsIds = __webpack_require__(/*! ../../../../context/requests-ids */ "../modules/ai/assets/js/editor/context/requests-ids.js");
 var RemoveBackground = function RemoveBackground() {
   var _useEditImage = (0, _editImageContext.useEditImage)(),
     editImage = _useEditImage.editImage;
-  var _useRequestIds = (0, _requestsIds.useRequestIds)(),
-    setGenerate = _useRequestIds.setGenerate;
   var _useImageActions = (0, _useImageActions2.default)(),
     use = _useImageActions.use,
     edit = _useImageActions.edit,
@@ -10113,10 +9468,7 @@ var RemoveBackground = function RemoveBackground() {
     height = _useImageSize.height;
   var handleSubmit = function handleSubmit(event) {
     event.preventDefault();
-    setGenerate();
-    send({
-      image: editImage
-    });
+    send(editImage);
   };
   return /*#__PURE__*/_react.default.createElement(_view.default, null, /*#__PURE__*/_react.default.createElement(_view.default.Panel, null, /*#__PURE__*/_react.default.createElement(_view.default.BackButton, null), /*#__PURE__*/_react.default.createElement(_view.default.PanelHeading, {
     primary: (0, _i18n.__)('Remove Background', 'elementor'),
@@ -10173,8 +9525,8 @@ exports["default"] = void 0;
 var _api = __webpack_require__(/*! ../../../../../api */ "../modules/ai/assets/js/editor/api/index.js");
 var _useImagePrompt = _interopRequireDefault(__webpack_require__(/*! ../../../hooks/use-image-prompt */ "../modules/ai/assets/js/editor/pages/form-media/hooks/use-image-prompt.js"));
 var useReplaceBackground = function useReplaceBackground(initialValue) {
-  var fetchAction = function fetchAction(payload) {
-    return (0, _api.getImageToImageReplaceBackground)(payload);
+  var fetchAction = function fetchAction(prompt, image) {
+    return (0, _api.getImageToImageReplaceBackground)(prompt, image);
   };
   return (0, _useImagePrompt.default)(fetchAction, initialValue);
 };
@@ -10213,7 +9565,6 @@ var _promptField = _interopRequireDefault(__webpack_require__(/*! ../../componen
 var _constants = __webpack_require__(/*! ../../constants */ "../modules/ai/assets/js/editor/pages/form-media/constants/index.js");
 var _newPromptButton = _interopRequireDefault(__webpack_require__(/*! ../../components/new-prompt-button */ "../modules/ai/assets/js/editor/pages/form-media/components/new-prompt-button.js"));
 var _locationContext = __webpack_require__(/*! ../../context/location-context */ "../modules/ai/assets/js/editor/pages/form-media/context/location-context.js");
-var _requestsIds = __webpack_require__(/*! ../../../../context/requests-ids */ "../modules/ai/assets/js/editor/context/requests-ids.js");
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 var ReplaceBackground = function ReplaceBackground() {
@@ -10221,8 +9572,6 @@ var ReplaceBackground = function ReplaceBackground() {
     _useState2 = (0, _slicedToArray2.default)(_useState, 2),
     prompt = _useState2[0],
     setPrompt = _useState2[1];
-  var _useRequestIds = (0, _requestsIds.useRequestIds)(),
-    setGenerate = _useRequestIds.setGenerate;
   var _useEditImage = (0, _editImageContext.useEditImage)(),
     editImage = _useEditImage.editImage;
   var _useImageActions = (0, _useImageActions2.default)(),
@@ -10233,17 +9582,14 @@ var ReplaceBackground = function ReplaceBackground() {
     data = _useReplaceBackground.data,
     send = _useReplaceBackground.send,
     isGenerating = _useReplaceBackground.isLoading,
-    error = _useReplaceBackground.error;
+    error = _useReplaceBackground.error,
+    reset = _useReplaceBackground.reset;
   var _useLocation = (0, _locationContext.useLocation)(),
     navigate = _useLocation.navigate;
   var isLoading = isGenerating || isUploading;
   var handleSubmit = function handleSubmit(event) {
     event.preventDefault();
-    setGenerate();
-    send({
-      prompt: prompt,
-      image: editImage
-    });
+    send(prompt, editImage);
   };
   return /*#__PURE__*/_react.default.createElement(_view.default, null, /*#__PURE__*/_react.default.createElement(_view.default.Panel, null, /*#__PURE__*/_react.default.createElement(_view.default.BackButton, null), /*#__PURE__*/_react.default.createElement(_view.default.PanelHeading, {
     primary: (0, _i18n.__)('Replace Background', 'elementor'),
@@ -10304,8 +9650,8 @@ exports["default"] = void 0;
 var _api = __webpack_require__(/*! ../../../../../api */ "../modules/ai/assets/js/editor/api/index.js");
 var _useImagePrompt = _interopRequireDefault(__webpack_require__(/*! ../../../hooks/use-image-prompt */ "../modules/ai/assets/js/editor/pages/form-media/hooks/use-image-prompt.js"));
 var useResize = function useResize(initialValue) {
-  var fetchAction = function fetchAction(payload) {
-    return (0, _api.getImageToImageUpscale)(payload);
+  var fetchAction = function fetchAction(prompt, promptSettings, image) {
+    return (0, _api.getImageToImageUpscale)(prompt, promptSettings, image);
   };
   return (0, _useImagePrompt.default)(fetchAction, initialValue);
 };
@@ -10342,15 +9688,12 @@ var _editImageContext = __webpack_require__(/*! ../../context/edit-image-context
 var _useResize2 = _interopRequireDefault(__webpack_require__(/*! ./hooks/use-resize */ "../modules/ai/assets/js/editor/pages/form-media/views/resize/hooks/use-resize.js"));
 var _useImageActions2 = _interopRequireDefault(__webpack_require__(/*! ../../hooks/use-image-actions */ "../modules/ai/assets/js/editor/pages/form-media/hooks/use-image-actions.js"));
 var _usePromptSettings2 = _interopRequireWildcard(__webpack_require__(/*! ../../hooks/use-prompt-settings */ "../modules/ai/assets/js/editor/pages/form-media/hooks/use-prompt-settings.js"));
-var _requestsIds = __webpack_require__(/*! ../../../../context/requests-ids */ "../modules/ai/assets/js/editor/context/requests-ids.js");
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 var Resize = function Resize() {
   var _useEditImage = (0, _editImageContext.useEditImage)(),
     editImage = _useEditImage.editImage,
     initialEditImageWidth = _useEditImage.width;
-  var _useRequestIds = (0, _requestsIds.useRequestIds)(),
-    setGenerate = _useRequestIds.setGenerate;
   var _useImageActions = (0, _useImageActions2.default)(),
     use = _useImageActions.use,
     edit = _useImageActions.edit,
@@ -10366,11 +9709,7 @@ var Resize = function Resize() {
   var isLoading = isGenerating || isUploading;
   var handleSubmit = function handleSubmit(event) {
     event.preventDefault();
-    setGenerate();
-    send({
-      promptSettings: settings,
-      image: editImage
-    });
+    send(null, settings, editImage);
   };
   return /*#__PURE__*/_react.default.createElement(_view.default, null, /*#__PURE__*/_react.default.createElement(_view.default.Panel, null, /*#__PURE__*/_react.default.createElement(_view.default.BackButton, null), /*#__PURE__*/_react.default.createElement(_view.default.PanelHeading, {
     primary: (0, _i18n.__)('Resize', 'elementor'),
@@ -10504,8 +9843,8 @@ exports["default"] = void 0;
 var _api = __webpack_require__(/*! ../../../../../api */ "../modules/ai/assets/js/editor/api/index.js");
 var _useImagePrompt = _interopRequireDefault(__webpack_require__(/*! ../../../hooks/use-image-prompt */ "../modules/ai/assets/js/editor/pages/form-media/hooks/use-image-prompt.js"));
 var useImageToImage = function useImageToImage(initialValue) {
-  var fetchAction = function fetchAction(payload) {
-    return (0, _api.getImageToImageGeneration)(payload);
+  var fetchAction = function fetchAction(prompt, promptSettings, image) {
+    return (0, _api.getImageToImageGeneration)(prompt, promptSettings, image);
   };
   return (0, _useImagePrompt.default)(fetchAction, initialValue);
 };
@@ -10549,7 +9888,6 @@ var _useImageToImage2 = _interopRequireDefault(__webpack_require__(/*! ./hooks/u
 var _useImageActions2 = _interopRequireDefault(__webpack_require__(/*! ../../hooks/use-image-actions */ "../modules/ai/assets/js/editor/pages/form-media/hooks/use-image-actions.js"));
 var _editImageContext = __webpack_require__(/*! ../../context/edit-image-context */ "../modules/ai/assets/js/editor/pages/form-media/context/edit-image-context.js");
 var _usePromptSettings2 = _interopRequireWildcard(__webpack_require__(/*! ../../hooks/use-prompt-settings */ "../modules/ai/assets/js/editor/pages/form-media/hooks/use-prompt-settings.js"));
-var _requestsIds = __webpack_require__(/*! ../../../../context/requests-ids */ "../modules/ai/assets/js/editor/context/requests-ids.js");
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 var IMAGE_WEIGHT_DEFAULT = 45;
@@ -10559,8 +9897,6 @@ var Variations = function Variations() {
     _useState2 = (0, _slicedToArray2.default)(_useState, 2),
     prompt = _useState2[0],
     setPrompt = _useState2[1];
-  var _useRequestIds = (0, _requestsIds.useRequestIds)(),
-    setGenerate = _useRequestIds.setGenerate;
   var _useEditImage = (0, _editImageContext.useEditImage)(),
     editImage = _useEditImage.editImage,
     initialAspectRatio = _useEditImage.aspectRatio;
@@ -10585,12 +9921,7 @@ var Variations = function Variations() {
   }, [data === null || data === void 0 ? void 0 : data.result]);
   var handleSubmit = function handleSubmit(event) {
     event.preventDefault();
-    setGenerate();
-    send({
-      prompt: prompt,
-      settings: settings,
-      image: editImage
-    });
+    send(prompt, settings, editImage);
   };
   return /*#__PURE__*/_react.default.createElement(_view.default, null, /*#__PURE__*/_react.default.createElement(_view.default.Panel, null, /*#__PURE__*/_react.default.createElement(_view.default.BackButton, null), /*#__PURE__*/_react.default.createElement(_view.default.PanelHeading, {
     primary: (0, _i18n.__)('Variations', 'elementor'),
@@ -10698,7 +10029,6 @@ var _loader = _interopRequireDefault(__webpack_require__(/*! ../../components/lo
 var _promptSearch = _interopRequireDefault(__webpack_require__(/*! ../../components/prompt-search */ "../modules/ai/assets/js/editor/components/prompt-search.js"));
 var _textarea = _interopRequireDefault(__webpack_require__(/*! ../../components/textarea */ "../modules/ai/assets/js/editor/components/textarea.js"));
 var _promptSuggestions = _interopRequireDefault(__webpack_require__(/*! ../../components/prompt-suggestions */ "../modules/ai/assets/js/editor/components/prompt-suggestions.js"));
-var _promptLibraryLink = _interopRequireDefault(__webpack_require__(/*! ../../components/prompt-library-link */ "../modules/ai/assets/js/editor/components/prompt-library-link.js"));
 var _promptActionSelection = _interopRequireDefault(__webpack_require__(/*! ../../components/prompt-action-selection */ "../modules/ai/assets/js/editor/components/prompt-action-selection.js"));
 var _generateButton = _interopRequireDefault(__webpack_require__(/*! ../../components/generate-button */ "../modules/ai/assets/js/editor/components/generate-button.js"));
 var _promptAction = _interopRequireDefault(__webpack_require__(/*! ../../components/prompt-action */ "../modules/ai/assets/js/editor/components/prompt-action.js"));
@@ -10706,8 +10036,6 @@ var _promptErrorMessage = _interopRequireDefault(__webpack_require__(/*! ../../c
 var _useTextPrompt2 = _interopRequireDefault(__webpack_require__(/*! ../../hooks/use-text-prompt */ "../modules/ai/assets/js/editor/hooks/use-text-prompt.js"));
 var _actionsData = __webpack_require__(/*! ../../actions-data */ "../modules/ai/assets/js/editor/actions-data.js");
 var _promptHistoryActionContext = __webpack_require__(/*! ../../components/prompt-history/context/prompt-history-action-context */ "../modules/ai/assets/js/editor/components/prompt-history/context/prompt-history-action-context.js");
-var _requestsIds = __webpack_require__(/*! ../../context/requests-ids */ "../modules/ai/assets/js/editor/context/requests-ids.js");
-var _voicePromotionAlert = __webpack_require__(/*! ../../components/voice-promotion-alert */ "../modules/ai/assets/js/editor/components/voice-promotion-alert.js");
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 var promptActions = [{
@@ -10772,8 +10100,6 @@ var FormText = function FormText(_ref) {
     _useState2 = (0, _slicedToArray2.default)(_useState, 2),
     prompt = _useState2[0],
     setPrompt = _useState2[1];
-  var _useRequestIds = (0, _requestsIds.useRequestIds)(),
-    setGenerate = _useRequestIds.setGenerate;
   (0, _promptHistoryActionContext.useSubscribeOnPromptHistoryAction)([{
     type: _promptHistoryActionContext.ACTION_TYPES.REUSE,
     handler: function handler(action) {
@@ -10793,11 +10119,8 @@ var FormText = function FormText(_ref) {
   var showSuggestions = !prompt;
   var handleSubmit = function handleSubmit(event) {
     event.preventDefault();
-    setGenerate();
     lastRun.current = function () {
-      return send({
-        prompt: prompt
-      });
+      return send(prompt);
     };
     lastRun.current();
   };
@@ -10806,15 +10129,11 @@ var FormText = function FormText(_ref) {
       return _regenerator.default.wrap(function _callee$(_context) {
         while (1) switch (_context.prev = _context.next) {
           case 0:
-            setGenerate();
             lastRun.current = function () {
-              return send({
-                input: resultField.current.value,
-                instruction: instruction
-              });
+              return send(resultField.current.value, instruction);
             };
             lastRun.current();
-          case 3:
+          case 2:
           case "end":
             return _context.stop();
         }
@@ -10863,9 +10182,7 @@ var FormText = function FormText(_ref) {
     suggestionFilter: function suggestionFilter(suggestion) {
       return suggestion + '...';
     }
-  }, /*#__PURE__*/_react.default.createElement(_promptLibraryLink.default, {
-    libraryLink: "https://go.elementor.com/ai-prompt-library-text/"
-  })), /*#__PURE__*/_react.default.createElement(_ui.Stack, {
+  }), /*#__PURE__*/_react.default.createElement(_ui.Stack, {
     direction: "row",
     alignItems: "center",
     sx: {
@@ -10927,12 +10244,7 @@ var FormText = function FormText(_ref) {
         return handleCustomInstruction(getInstruction(event.target.value));
       }
     });
-  })), /*#__PURE__*/_react.default.createElement(_voicePromotionAlert.VoicePromotionAlert, {
-    introductionKey: "ai-context-text-promotion",
-    sx: {
-      mb: 2
-    }
-  }), /*#__PURE__*/_react.default.createElement(_ui.Stack, {
+  })), /*#__PURE__*/_react.default.createElement(_ui.Stack, {
     direction: "row",
     alignItems: "center",
     sx: {
@@ -18268,17 +17580,17 @@ module.exports = _toConsumableArray, module.exports.__esModule = true, module.ex
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var _typeof = (__webpack_require__(/*! ./typeof.js */ "../node_modules/@babel/runtime/helpers/typeof.js")["default"]);
-function toPrimitive(t, r) {
-  if ("object" != _typeof(t) || !t) return t;
-  var e = t[Symbol.toPrimitive];
-  if (void 0 !== e) {
-    var i = e.call(t, r || "default");
-    if ("object" != _typeof(i)) return i;
+function _toPrimitive(input, hint) {
+  if (_typeof(input) !== "object" || input === null) return input;
+  var prim = input[Symbol.toPrimitive];
+  if (prim !== undefined) {
+    var res = prim.call(input, hint || "default");
+    if (_typeof(res) !== "object") return res;
     throw new TypeError("@@toPrimitive must return a primitive value.");
   }
-  return ("string" === r ? String : Number)(t);
+  return (hint === "string" ? String : Number)(input);
 }
-module.exports = toPrimitive, module.exports.__esModule = true, module.exports["default"] = module.exports;
+module.exports = _toPrimitive, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
 
@@ -18290,11 +17602,11 @@ module.exports = toPrimitive, module.exports.__esModule = true, module.exports["
 
 var _typeof = (__webpack_require__(/*! ./typeof.js */ "../node_modules/@babel/runtime/helpers/typeof.js")["default"]);
 var toPrimitive = __webpack_require__(/*! ./toPrimitive.js */ "../node_modules/@babel/runtime/helpers/toPrimitive.js");
-function toPropertyKey(t) {
-  var i = toPrimitive(t, "string");
-  return "symbol" == _typeof(i) ? i : String(i);
+function _toPropertyKey(arg) {
+  var key = toPrimitive(arg, "string");
+  return _typeof(key) === "symbol" ? key : String(key);
 }
-module.exports = toPropertyKey, module.exports.__esModule = true, module.exports["default"] = module.exports;
+module.exports = _toPropertyKey, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
 
